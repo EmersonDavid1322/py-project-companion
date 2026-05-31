@@ -103,7 +103,7 @@ def mostrar_proyectos():
     proyectos = cargar_proyectos()
 
     for proyecto in proyectos:
-        print(f"Nombre: {proyecto.nombre} \nRuta: {proyecto.ruta}\n")
+        print(f"Nombre: {proyecto.nombre} \nRuta: {proyecto.ruta}\nEntrono virtua: {proyecto.entorno_virtual}\n")
 
 def crear_ev_personalizado():
     proyectos = cargar_proyectos()
