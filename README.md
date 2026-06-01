@@ -26,7 +26,7 @@ Para que el script pueda interactuar con GitHub de forma invisible en segundo pl
    ```
 2. Ejecuta el script principal:
    ```bash
-   python main.py
+   python main_menu.py
    ```
 3. Sigue las instrucciones en pantalla para registrar un nuevo proyecto o gestionar uno existente.
 
