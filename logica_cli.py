@@ -240,7 +240,8 @@ def git_commit():
         
         subprocess.run(["git", "push", "origin", "main"], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta)
         
-        print("¡Cambios subidos con éxito!")
+        print("¡Cambios subidos con éxito!\n")
+        print(f"Ruta: {proyecto_seleccionado.ruta}")
 
     except subprocess.CalledProcessError:
         print("Error: Este directorio no parece tener un repositorio de Git configurado.")
