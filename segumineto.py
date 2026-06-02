@@ -31,23 +31,25 @@ def verificar_proyecto_basico(proyecto):
         return None
     
 def verificador_proyecto_intermedio(proyecto):
-    print(f"=== REPORTE DE SALUD: {proyecto.nombre.upper()} ===")
-    
-    ruta_git = os.path.join(proyecto.ruta, ".git")
-    tiene_git = os.path.exists(ruta_git)
-    
-    ruta_requirements = os.path.join(proyecto.ruta, "requirements.txt")
-    tiene_requirements = os.path.exists(ruta_requirements)
-    
-    archivos_en_directorio = os.listdir(proyecto.ruta)
-    contador_scripts_python = 0
-    contador_scripts_bash = 0
-    
-    for archivo in archivos_en_directorio:
-        if archivo.endswith(".py"):
-            contador_scripts_python += 1
-        elif archivo.endswith(".sh"):
-            contador_scripts_bash += 1
+    try:
 
-    return tiene_git, tiene_requirements, contador_scripts_python, contador_scripts_bash
+        ruta_git = os.path.join(proyecto.ruta, ".git")
+        tiene_git = os.path.exists(ruta_git)
+        
+        ruta_requirements = os.path.join(proyecto.ruta, "requirements.txt")
+        tiene_requirements = os.path.exists(ruta_requirements)
+        
+        archivos_en_directorio = os.listdir(proyecto.ruta)
+        contador_scripts_python = 0
+        contador_scripts_bash = 0
+        
+        for archivo in archivos_en_directorio:
+            if archivo.endswith(".py"):
+                contador_scripts_python += 1
+            elif archivo.endswith(".sh"):
+                contador_scripts_bash += 1
 
+        return tiene_git, tiene_requirements, contador_scripts_python, contador_scripts_bash
+    except:
+        print("Error: la ruta del proyecto no existe")
+        return None

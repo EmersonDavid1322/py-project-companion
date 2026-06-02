@@ -194,6 +194,7 @@ def escanear_proyecto():
     
     tiene_git, tiene_requirements, contador_scrips, contador_sh = verificador_proyecto_intermedio(proyecto=proyecto)
 
+    print(f"=== REPORTE DE SALUD: {proyecto.nombre.upper()} ===")
     print(f"📍 Ruta: {proyecto.ruta}")
     print(f"📦 Entorno Virtual: {proyecto.entorno_virtual if ruta_verificacion_ev else '❌ No configurado'}")
     print(f"🐙 Repositorio Git: {'✅ Inicializado' if tiene_git else '❌ Sin Git'}")
