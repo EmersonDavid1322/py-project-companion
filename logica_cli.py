@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from class_launcher import Proyecto
 from storge_json import guardar_proyecto, cargar_proyectos
-from segumineto import verificar_proyecto_basico, verificador_proyecto_intermedio
+from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermedio
 
 def encontrar_proyecto():
     proyectos = cargar_proyectos()
@@ -208,6 +208,7 @@ def git_commit():
     if proyecto_seleccionado is None:
         return
 
+    print(f"Ruta: {proyecto_seleccionado.ruta}\n")
     print("Debe de colocar el commit entre comillas dobles\n")
     commit = input("Introduzca el commit: ")
 
@@ -242,7 +243,6 @@ def git_commit():
         subprocess.run(["git", "push", "origin", "main"], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta)
         
         print("¡Cambios subidos con éxito!\n")
-        print(f"Ruta: {proyecto_seleccionado.ruta}")
 
     except subprocess.CalledProcessError:
         print("Error: Este directorio no parece tener un repositorio de Git configurado.")
