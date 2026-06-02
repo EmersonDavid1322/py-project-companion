@@ -1,12 +1,15 @@
-from servicios import agregar_proyecto, mostrar_proyectos, activar_proyecto, crear_ev_personalizado, git_commit
+from logica_cli import agregar_proyecto, mostrar_proyectos, activar_proyecto, crear_ev_personalizado, git_commit, eliminar, escanear_proyecto,editar
 
 def main_menu():
     while True:
         print("1) Agregar proyecto")
-        print("2) ver proyectos")
-        print("3) crear entorno virtual")
-        print("4) activar proyecto")
-        print("5) subir cambios a github")
+        print("2) Editar proyecto")
+        print("3) Eliminar proyecto")
+        print("4) Ver proyectos")
+        print("5) Crear entorno virtual")
+        print("6) Activar proyecto")
+        print("7) Subir cambios a github")
+        print("8) Escanear proyecto")
         print("0) Salir")
 
         try:
@@ -19,16 +22,25 @@ def main_menu():
             agregar_proyecto()
 
         elif opcion == 2:
-            mostrar_proyectos()
+            editar()
 
         elif opcion == 3:
-            crear_ev_personalizado()
+            eliminar()
 
         elif opcion == 4:
-            activar_proyecto()
+            mostrar_proyectos()
 
         elif opcion == 5:
+            crear_ev_personalizado()
+
+        elif opcion == 6:
+            activar_proyecto()
+
+        elif opcion == 7:
             git_commit()
+
+        elif opcion == 8:
+            escanear_proyecto()
 
         elif opcion == 0:
             print("Ten un buen dia :)")
