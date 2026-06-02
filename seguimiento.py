@@ -28,7 +28,7 @@ def verificar_proyecto_basico(proyecto):
     
     except FileNotFoundError:
         print("Error: la ruta del proyecto no existe")
-        return None
+        return False, False, None, None
     
 def verificador_proyecto_intermedio(proyecto):
     try:
@@ -50,6 +50,6 @@ def verificador_proyecto_intermedio(proyecto):
                 contador_scripts_bash += 1
 
         return tiene_git, tiene_requirements, contador_scripts_python, contador_scripts_bash
-    except:
+    except FileNotFoundError:
         print("Error: la ruta del proyecto no existe")
-        return None
+        return False, False, 0, 0
