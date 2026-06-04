@@ -17,6 +17,9 @@ def main_menu():
         except ValueError:
             print("Opción no valida")
             continue
+        except KeyboardInterrupt:
+            print("\nTen un buen dia :)")
+            break
 
         if opcion == 1:
             agregar_proyecto()

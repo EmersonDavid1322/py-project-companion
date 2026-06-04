@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from storge_json import guardar_proyecto, cargar_proyectos
 
 def verificar_proyecto_basico(proyecto):
 
@@ -53,3 +54,29 @@ def verificador_proyecto_intermedio(proyecto):
     except FileNotFoundError:
         print("Error: la ruta del proyecto no existe")
         return False, False, 0, 0
+    
+def comprobar_info(proyecto):
+    proyectos = cargar_proyectos()
+    
+    ruta_verificacion_proyecto, ruta_verificacion_ev, nombre_ev = verificar_proyecto_basico(proyecto=proyecto)
+    
+    tiene_git, tiene_requirements, contador_scrips, contador_sh = verificador_proyecto_intermedio(proyecto=proyecto)
+
+    if ruta_verificacion_proyecto:
+        if ruta_verificacion_ev:
+            if nombre_ev != proyecto.entorno_virtual:
+                try:
+                    indice = proyectos.index(proyecto)
+                    
+                    proyectos[indice].entorno_virtual = nombre_ev
+                    
+                    guardar_proyecto(proyectos=proyectos)
+                    print("Se actualizó el nombre del entorno virtual.")
+                    
+                except ValueError:
+                    print("Error: El proyecto no existe en la lista guardada.")
+    else:
+        print("Error: No se ha encontrado el directorio.")
+
+
+

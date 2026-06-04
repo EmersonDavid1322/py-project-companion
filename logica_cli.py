@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from class_launcher import Proyecto
 from storge_json import guardar_proyecto, cargar_proyectos
-from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermedio
+from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermedio, comprobar_info
 
 def encontrar_proyecto():
     proyectos = cargar_proyectos()
@@ -11,9 +11,10 @@ def encontrar_proyecto():
     
 
     for i, proyecto in enumerate(proyectos):
-        print(f"{i} | {proyecto.nombre} | Entorno: {proyecto.entorno_virtual}\nRuta: {proyecto.ruta}\n")
+        print(f"| {i} {proyecto}")
 
     try:
+        print("Cancela con 'CTRL + C'")
         seleccion = int(input("Intruduzca el indice del proyecto: "))
 
         if seleccion >= 0:
@@ -24,7 +25,10 @@ def encontrar_proyecto():
             print("El indice debe ser mayor o igual a 0")
 
     except (ValueError, IndexError) as e:
-        print(f"Error: {e}")
+        print(f"Error: {e}\n")
+    
+    except KeyboardInterrupt:
+        print("Cancelado\n")
 
     return proyecto_usar, proyectos
 
@@ -74,52 +78,35 @@ def agregar_proyecto():
     ruta_verificacion_proyecto, ruta_verificacion_ev, nombre_ev= verificar_proyecto_basico(proyecto=proyecto)
 
     if ruta_verificacion_proyecto:
-        if ruta_verificacion_ev:
-            print(f"EL proyecto a sido agregado correctamente. \nNombre: {proyecto.nombre} \nRuta: {proyecto.ruta}")
-            proyecto.entorno_virtual = nombre_ev
-            proyecto_list.append(proyecto)
-            guardar_proyecto(proyectos=proyecto_list)
-        else:
-            print("(El proyecto se a guardo sin un entorno virtual)\nNo se a detecteado un entorno virtual, recomendamos crearlo.\n")
-
-            confirmacio_ev = input("(Por defecto venv)\nDesea agregar uno de forma automatica (SI/NO): ").lower()
-            if confirmacio_ev in ("si","s"):
-                nombre_ev_new = crear_ev(proyecto=proyecto_list)
-                proyecto.entorno_virtual = nombre_ev_new
-                proyecto_list.append(proyecto)
-                guardar_proyecto(proyectos=proyecto_list)
-            else:
-                proyecto_list.append(proyecto)
-                guardar_proyecto(proyectos=proyecto_list)
+        proyecto_list.append(proyecto)
+        guardar_proyecto(proyectos=proyecto_list)
+        print("Recomendamos escaner el proyecto para guardar la información\n")
     else:
         print("Error: No se a encontrado la ruta")
 
 def editar():
     proyecto_seleccionado, proyectos = encontrar_proyecto()
 
-    print("Si no desea cambiar un campo dejalo vasio\n")
-
-    if proyecto_seleccionado:
-        nombre = input("Introduzca el nombre: \n")
-
-        ubicacion = input("Coloque la ubicación del proyecto: \n").strip()
-
-        env = input("Introduza el nombre del entorno virtual: \n")
-
-        if nombre != "":
-            proyecto_seleccionado.nombre = nombre
-
-        if ubicacion != "":
-            proyecto_seleccionado.ruta = ubicacion
-
-        if env != "":
-            proyecto_seleccionado.entorno_virtual = env
-
-        guardar_proyecto(proyectos=proyectos)
-
-    else:
-        print("Proyecto no encontrado")
+    if proyecto_seleccionado is None:
         return
+
+    print("Si no desea cambiar un campo, dejalo vacio")
+    nombre = input("Introduzca el nombre: \n")
+
+    ubicacion = input("Coloque la ubicación del proyecto: \n").strip()
+
+    env = input("Introduza el nombre del entorno virtual: \n")
+
+    if nombre != "":
+        proyecto_seleccionado.nombre = nombre
+
+    if ubicacion != "":
+        proyecto_seleccionado.ruta = ubicacion
+
+    if env != "":
+        proyecto_seleccionado.entorno_virtual = env
+
+    guardar_proyecto(proyectos=proyectos)
 
     print(f"Nombre: {proyecto_seleccionado.nombre}\nRuta: {proyecto_seleccionado.ruta}\nenv: {proyecto_seleccionado.entorno_virtual}")
 
@@ -138,10 +125,13 @@ def mostrar_proyectos():
     proyectos = cargar_proyectos()
 
     for proyecto in proyectos:
-        print(f"Nombre: {proyecto.nombre} \nRuta: {proyecto.ruta}\nEntrono virtua: {proyecto.entorno_virtual}\n")
+        print(proyecto)
 
 def crear_ev_personalizado():
     proyecto_seleccionado, proyectos = encontrar_proyecto()
+
+    if proyecto_seleccionado is None:
+        return
     
     nombre_ev = crear_ev(proyecto=proyecto_seleccionado)
     if nombre_ev == None:
@@ -192,9 +182,11 @@ def escanear_proyecto():
     if proyecto is None:
         return
 
-    ruta_verificacion_proyecto, ruta_verificacion_ev, _, = verificar_proyecto_basico(proyecto=proyecto)
+    ruta_verificacion_proyecto, ruta_verificacion_ev, _ = verificar_proyecto_basico(proyecto=proyecto)
     
     tiene_git, tiene_requirements, contador_scrips, contador_sh = verificador_proyecto_intermedio(proyecto=proyecto)
+
+    comprobar_info(proyecto=proyecto)
 
     print(f"=== REPORTE DE SALUD: {proyecto.nombre.upper()} ===")
     print(f"📍 Ruta: {proyecto.ruta}")

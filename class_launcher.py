@@ -11,6 +11,17 @@ class Proyecto:
             "entorno": self.entorno_virtual
         }
     
+    def __str__(self):
+        return f"| {self.nombre} | \n| Entorno: {self.entorno_virtual} |\nRuta: {self.ruta}\n"
+    
+    def __repr__(self):
+        return f"Proyecto(nombre='{self.nombre}', ruta='{self.ruta}', ev='{self.entorno_virtual}')"
+    
+    def __eq__(self, otro):
+        if not isinstance(otro, Proyecto):
+            return False
+        return self.nombre == otro.nombre 
+    
     @classmethod
     def desde_diccionario(cls, diccionario):
         return cls(
@@ -18,3 +29,4 @@ class Proyecto:
             ruta=diccionario["ruta"],
             ev=diccionario["entorno"]
         )
+
