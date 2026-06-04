@@ -7,25 +7,27 @@ from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermed
 
 def encontrar_proyecto():
     proyectos = cargar_proyectos()
+    proyecto_usar = None
+    
 
     for i, proyecto in enumerate(proyectos):
         print(f"{i} | {proyecto.nombre} | Entorno: {proyecto.entorno_virtual}\nRuta: {proyecto.ruta}\n")
 
-    seleccion = input("Intruduzca el proyecto que desea activar: ")
-
     try:
-        for proyecto in proyectos:
-            if seleccion == proyecto.nombre:
-                proyecto_usar = proyecto
-                print(f"Proyecto {proyecto_usar.nombre} encontrado\n")
+        seleccion = int(input("Intruduzca el indice del proyecto: "))
 
-    except UnboundLocalError:
-        print(f"Proyecto '{seleccion}' no encontrado\n")
-        proyecto_usar = None
-        return proyecto_usar, proyectos
+        if seleccion >= 0:
+
+            proyecto_usar = proyectos[seleccion]
+            print(proyecto_usar.nombre)
+        else:
+            print("El indice debe ser mayor o igual a 0")
+
+    except (ValueError, IndexError) as e:
+        print(f"Error: {e}")
 
     return proyecto_usar, proyectos
-    
+
 def crear_ev(proyecto):
 
     try:
@@ -157,10 +159,10 @@ def activar_proyecto():
     if proyecto_seleccionado is None:
         return
 
-    ruta_venv = os.path.join(proyecto_seleccionado.ruta, proyecto_seleccionado.entorno_virtual, "bin", "activate")
-    print(ruta_venv)
-
-    if os.path.exists(ruta_venv):
+    
+    if proyecto_seleccionado.entorno_virtual != None:
+        ruta_venv = os.path.join(proyecto_seleccionado.ruta, proyecto_seleccionado.entorno_virtual, "bin", "activate")
+        print(ruta_venv)
         comando_interno = f"bash --rcfile <(echo 'source ~/.bashrc; source {ruta_venv}')"
     
     else:

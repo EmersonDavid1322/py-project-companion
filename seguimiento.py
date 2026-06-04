@@ -28,7 +28,7 @@ def verificar_proyecto_basico(proyecto):
     
     except FileNotFoundError:
         print("Error: la ruta del proyecto no existe")
-        return False, False, None, None
+        return False, False, None
     
 def verificador_proyecto_intermedio(proyecto):
     try:
