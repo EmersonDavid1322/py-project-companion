@@ -203,7 +203,6 @@ def git_commit():
         return
 
     print(f"Ruta: {proyecto_seleccionado.ruta}\n")
-    print("Debe de colocar el commit entre comillas dobles\n")
     commit = input("Introduzca el commit: ")
 
     try:
@@ -228,7 +227,7 @@ def git_commit():
                 print("Operación cancelada para evitar bloqueos.")
                 return
 
-        print("Subiendo cambios de forma invisible...")
+        print("Subiendo cambios...")
         
         subprocess.run(["git", "add", "."], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta)
         
