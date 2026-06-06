@@ -1,6 +1,7 @@
 import subprocess
 import os
 from pathlib import Path
+import platform
 from class_launcher import Proyecto
 from storge_json import guardar_proyecto, cargar_proyectos
 from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermedio, comprobar_info
@@ -33,6 +34,7 @@ def encontrar_proyecto():
     return proyecto_usar, proyectos
 
 def crear_ev(proyecto):
+    sistema = platform.system()
 
     try:
 
@@ -45,9 +47,11 @@ def crear_ev(proyecto):
 
             ruta = Path(proyecto.ruta)
 
+            comando_python = "py" if sistema == "Windows" else "python3"
+
             ruta_final_env = ruta / ".venv"
 
-            comando_interno = ["python3", "-m", "venv", str(ruta_final_env)]
+            comando_interno = [comando_python, "-m", "venv", str(ruta_final_env)]
 
             resultado = subprocess.run(
             comando_interno,
@@ -57,15 +61,61 @@ def crear_ev(proyecto):
             )
             
             if resultado.returncode == 0:
-                print("Entorno virtual creado con éxito.")
+                print("Entorno virtual creado con éxito.\n")
                 return ".venv"
             else:
-                print(f"Error al crear el entorno: {resultado.stderr}")
+                print(f"Error al crear el entorno: {resultado.stderr}\n")
             return None
     
     except FileNotFoundError:
         print("Error: la ruta del proyecto no existe")
         return None
+
+def activar_windows(proyecto):
+
+    if proyecto.entorno_virtual is not None:
+        ruta_venv = os.path.join(proyecto.ruta, proyecto.entorno_virtual, "Scripts", "Activate.ps1")
+        comando_interno = f'powershell -NoExit -ExecutionPolicy Bypass -File "{ruta_venv}"'
+        print(ruta_venv)
+
+    else:
+        comando_interno = f'powershell -NoExit -Command "Set-Location \'{proyecto.ruta}\'"'
+        print("Nota: No se detectó entorno virtual (.venv), abriendo terminal normal.")
+
+    try:
+        subprocess.run(f"start {comando_interno}", shell=True, check=True)
+        subprocess.run(["code", proyecto.ruta], shell="Windows", check=True)
+
+    except subprocess.CalledProcessError as e:
+        print(f"❌ El comando falló con el código: {e.returncode}")
+        print(f"🔍 El comando que falló fue: {e.cmd}")
+
+def activar_linux(proyecto):
+
+    if proyecto.entorno_virtual is not None:
+        ruta_venv = os.path.join(proyecto.ruta, proyecto.entorno_virtual, "bin", "activate")
+        comando_interno = f"bash --rcfile <(echo 'source ~/.bashrc; source {ruta_venv}')"
+        print(ruta_venv)
+
+    else:
+        comando_interno = f"cd '{proyecto.ruta}' && exec bash"
+        print("Nota: No se detectó entorno virtual (.venv), abriendo terminal normal.")
+
+    try:
+        subprocess.run([
+            "x-terminal-emulator", 
+            "--", 
+            "bash", 
+            "-c", 
+            comando_interno
+        ], check=True)
+
+        subprocess.run(["code", proyecto.ruta], check=True) 
+
+    except subprocess.CalledProcessError as e:
+        print(f"❌ El comando falló con el código: {e.returncode}")
+        print(f"🔍 El comando que falló fue: {e.cmd}")
+
 
 def agregar_proyecto():
     proyecto_list = cargar_proyectos()
@@ -148,32 +198,18 @@ def activar_proyecto():
 
     if proyecto_seleccionado is None:
         return
+    
+    sistema = platform.system()
 
-    
-    if proyecto_seleccionado.entorno_virtual != None:
-        ruta_venv = os.path.join(proyecto_seleccionado.ruta, proyecto_seleccionado.entorno_virtual, "bin", "activate")
-        print(ruta_venv)
-        comando_interno = f"bash --rcfile <(echo 'source ~/.bashrc; source {ruta_venv}')"
-    
+    if sistema == "Windows":
+        activar_windows(proyecto=proyecto_seleccionado)
+
+    elif sistema == "Linux":
+        activar_linux(proyecto=proyecto_seleccionado)
+
     else:
-        comando_interno = f"cd '{proyecto_seleccionado.ruta}' && exec bash"
-        print("Nota: No se detectó entorno virtual (.venv), abriendo terminal normal.")
+        print(f"Sistema operativo {sistema} no soportado temporalmente")
 
-    try:
-        subprocess.run([
-            "x-terminal-emulator", 
-            "--", 
-            "bash", 
-            "-c", 
-            comando_interno
-        ], check=True)
-
-        subprocess.run(["code", proyecto_seleccionado.ruta], check=True)
-    
-    except subprocess.CalledProcessError as e:
-        print(f"❌ El comando falló con el código: {e.returncode}")
-        print(f"🔍 El comando que falló fue: {e.cmd}")
-        print(f"⚠️ Mensaje real de Linux: {e.stderr}")
 
 
 def escanear_proyecto():
@@ -198,14 +234,19 @@ def escanear_proyecto():
 
 def git_commit():
     proyecto_seleccionado, _ = encontrar_proyecto()
+    sistema = platform.system()
 
     if proyecto_seleccionado is None:
         return
 
-    print(f"Ruta: {proyecto_seleccionado.ruta}\n")
-    commit = input("Introduzca el commit: ")
-
     try:
+        print(f"Ruta: {proyecto_seleccionado.ruta}\n")
+        commit = input("Introduzca el commit:\n")
+        rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
+        if rama == "":
+            rama = "main"
+
+
 
         resultado = subprocess.run(
             ["git", "remote", "get-url", "origin"], 
@@ -233,9 +274,12 @@ def git_commit():
         
         subprocess.run(["git", "commit", "-m", commit], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta)
         
-        subprocess.run(["git", "push", "origin", "main"], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta)
+        subprocess.run(["git", "push", "origin", rama], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta, shell=(sistema == "Windows"), check=True)
         
         print("¡Cambios subidos con éxito!\n")
 
     except subprocess.CalledProcessError:
         print("Error: Este directorio no parece tener un repositorio de Git configurado.")
+
+    except KeyboardInterrupt:
+        print("Cancelado\n")
