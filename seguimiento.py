@@ -63,18 +63,16 @@ def comprobar_info(proyecto):
     tiene_git, tiene_requirements, contador_scrips, contador_sh = verificador_proyecto_intermedio(proyecto=proyecto)
 
     if ruta_verificacion_proyecto:
-        if ruta_verificacion_ev:
-            if nombre_ev != proyecto.entorno_virtual:
-                try:
+        if nombre_ev != proyecto.entorno_virtual:
+            try:
                     indice = proyectos.index(proyecto)
                     
                     proyectos[indice].entorno_virtual = nombre_ev
                     
                     guardar_proyecto(proyectos=proyectos)
                     print("Se actualizó el nombre del entorno virtual.")
-                    
-                except ValueError:
-                    print("Error: El proyecto no existe en la lista guardada.")
+            except ValueError:
+                print("Error: El proyecto no existe en la lista guardada.")
     else:
         print("Error: No se ha encontrado el directorio.")
 
