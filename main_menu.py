@@ -21,35 +21,24 @@ def main_menu():
             print("\nTen un buen dia :)")
             break
 
-        if opcion == 1:
-            agregar_proyecto()
+        opciones = {
+            1: agregar_proyecto,
+            2: editar,
+            3: eliminar,
+            4: mostrar_proyectos,
+            5: crear_ev_personalizado,
+            6: activar_proyecto,
+            7: git_commit,
+            8: escanear_proyecto
+        }
 
-        elif opcion == 2:
-            editar()
-
-        elif opcion == 3:
-            eliminar()
-
-        elif opcion == 4:
-            mostrar_proyectos()
-
-        elif opcion == 5:
-            crear_ev_personalizado()
-
-        elif opcion == 6:
-            activar_proyecto()
-
-        elif opcion == 7:
-            git_commit()
-
-        elif opcion == 8:
-            escanear_proyecto()
-
+        if opcion in opciones:
+            opciones[opcion]()
         elif opcion == 0:
-            print("Ten un buen dia :)")
+            print("Ten un buen día :)")
             break
         else:
-            print("Opcion no disponible")
+            print("Opción no disponible")
 
 
 

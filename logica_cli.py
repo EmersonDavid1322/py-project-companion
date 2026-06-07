@@ -73,8 +73,8 @@ def crear_ev(proyecto):
 
 def activar_windows(proyecto):
 
-    if proyecto.entorno_virtual is not None:
-        ruta_venv = os.path.join(proyecto.ruta, proyecto.entorno_virtual, "Scripts", "Activate.ps1")
+    if proyecto._entorno_virtual is not None:
+        ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "Scripts", "Activate.ps1")
         comando_interno = f'powershell -NoExit -ExecutionPolicy Bypass -File "{ruta_venv}"'
         print(ruta_venv)
 
@@ -92,8 +92,8 @@ def activar_windows(proyecto):
 
 def activar_linux(proyecto):
 
-    if proyecto.entorno_virtual is not None:
-        ruta_venv = os.path.join(proyecto.ruta, proyecto.entorno_virtual, "bin", "activate")
+    if proyecto._entorno_virtual is not None:
+        ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "bin", "activate")
         comando_interno = f"bash --rcfile <(echo 'source ~/.bashrc; source {ruta_venv}')"
         print(ruta_venv)
 
@@ -154,11 +154,11 @@ def editar():
         proyecto_seleccionado.ruta = ubicacion
 
     if env != "":
-        proyecto_seleccionado.entorno_virtual = env
+        proyecto_seleccionado._entorno_virtual = env
 
     guardar_proyecto(proyectos=proyectos)
 
-    print(f"Nombre: {proyecto_seleccionado.nombre}\nRuta: {proyecto_seleccionado.ruta}\nenv: {proyecto_seleccionado.entorno_virtual}")
+    print(f"Nombre: {proyecto_seleccionado.nombre}\nRuta: {proyecto_seleccionado.ruta}\nenv: {proyecto_seleccionado._entorno_virtual}")
 
 
 def eliminar():
@@ -188,7 +188,7 @@ def crear_ev_personalizado():
         print("Hubo un error en la ejecución")
         return
 
-    proyecto_seleccionado.entorno_virtual = nombre_ev
+    proyecto_seleccionado._entorno_virtual = nombre_ev
 
     guardar_proyecto(proyectos=proyectos)
     print("¡Proyecto actualizado y guardado con éxito!")
@@ -226,10 +226,10 @@ def escanear_proyecto():
 
     print(f"=== REPORTE DE SALUD: {proyecto.nombre.upper()} ===")
     print(f"📍 Ruta: {proyecto.ruta}")
-    print(f"📦 Entorno Virtual: {proyecto.entorno_virtual if ruta_verificacion_ev else '❌ No configurado'}")
+    print(f"📦 Entorno Virtual: {proyecto._entorno_virtual if ruta_verificacion_ev else '❌ No configurado'}")
     print(f"🐙 Repositorio Git: {'✅ Inicializado' if tiene_git else '❌ Sin Git'}")
     print(f"📋 Archivo de Dependencias: {'✅ Detectado (requirements.txt)' if tiene_requirements else '⚠️ Falta requirements.txt'}")
-    print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} archivos .sh")
+    print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} arentorno_virtualchivos .sh")
     print("=========================================\n")
 
 def git_commit():

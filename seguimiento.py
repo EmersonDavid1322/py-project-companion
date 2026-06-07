@@ -15,6 +15,9 @@ def verificar_proyecto_basico(proyecto):
 
         nombres_comunes = ["venv", ".venv", "env", ".env"]
 
+        if proyecto._entorno_virtual != None:
+            nombres_comunes.append(proyecto._entorno_virtual)
+
         contenido = os.listdir(proyecto.ruta)
 
         for elemento in contenido:
@@ -63,7 +66,8 @@ def comprobar_info(proyecto):
     tiene_git, tiene_requirements, contador_scrips, contador_sh = verificador_proyecto_intermedio(proyecto=proyecto)
 
     if ruta_verificacion_proyecto:
-        if nombre_ev != proyecto.entorno_virtual:
+        if nombre_ev != proyecto._entorno_virtual:
+            print(f"Nombre ev: {nombre_ev} Nombre proyecto ev: {proyecto._entorno_virtual}")
             try:
                     indice = proyectos.index(proyecto)
                     
@@ -71,8 +75,8 @@ def comprobar_info(proyecto):
                     
                     guardar_proyecto(proyectos=proyectos)
                     print("Se actualizó el nombre del entorno virtual.")
-            except ValueError:
-                print("Error: El proyecto no existe en la lista guardada.")
+            except ValueError as e:
+                print(f"Error: {e}")
     else:
         print("Error: No se ha encontrado el directorio.")
 
