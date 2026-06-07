@@ -5,7 +5,6 @@ from storge_json import guardar_proyecto, cargar_proyectos
 def verificar_proyecto_basico(proyecto):
 
     try:
-    
         verificacion_carpeta_proyecto = Path(proyecto.ruta)
 
         if verificacion_carpeta_proyecto.exists():
@@ -36,9 +35,11 @@ def verificar_proyecto_basico(proyecto):
     
 def verificador_proyecto_intermedio(proyecto):
     try:
-
         ruta_git = os.path.join(proyecto.ruta, ".git")
         tiene_git = os.path.exists(ruta_git)
+
+        if not tiene_git:
+            ruta_git = None
         
         ruta_requirements = os.path.join(proyecto.ruta, "requirements.txt")
         tiene_requirements = os.path.exists(ruta_requirements)
@@ -53,7 +54,7 @@ def verificador_proyecto_intermedio(proyecto):
             elif archivo.endswith(".sh"):
                 contador_scripts_bash += 1
 
-        return tiene_git, tiene_requirements, contador_scripts_python, contador_scripts_bash
+        return ruta_git, tiene_requirements, contador_scripts_python, contador_scripts_bash
     except FileNotFoundError:
         print("Error: la ruta del proyecto no existe")
         return False, False, 0, 0
@@ -63,7 +64,7 @@ def comprobar_info(proyecto):
     
     ruta_verificacion_proyecto, ruta_verificacion_ev, nombre_ev = verificar_proyecto_basico(proyecto=proyecto)
     
-    tiene_git, tiene_requirements, contador_scrips, contador_sh = verificador_proyecto_intermedio(proyecto=proyecto)
+    ruta_git, tiene_requirements, contador_scrips, contador_sh = verificador_proyecto_intermedio(proyecto=proyecto)
 
     if ruta_verificacion_proyecto:
         if nombre_ev != proyecto._entorno_virtual:
@@ -71,12 +72,20 @@ def comprobar_info(proyecto):
             try:
                     indice = proyectos.index(proyecto)
                     
-                    proyectos[indice].entorno_virtual = nombre_ev
-                    
+                    proyectos[indice]._entorno_virtual = nombre_ev
+
                     guardar_proyecto(proyectos=proyectos)
                     print("Se actualizó el nombre del entorno virtual.")
             except ValueError as e:
                 print(f"Error: {e}")
+
+        if ruta_git and proyecto._git_carpeta != ruta_git:
+            indice = proyectos.index(proyecto)
+
+            proyectos[indice]._git_carpeta = ruta_git
+            guardar_proyecto(proyectos=proyectos)
+            print("Se a actualizado la información de la carpeta git")
+
     else:
         print("Error: No se ha encontrado el directorio.")
 

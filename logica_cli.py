@@ -123,7 +123,7 @@ def agregar_proyecto():
 
     ubicacion = input("Coloque la ubicación del proyecto: ").strip()
 
-    proyecto = Proyecto(nombre=nombre, ruta=ubicacion, ev=None)
+    proyecto = Proyecto(nombre=nombre, ruta=ubicacion, ev=None, git_carpeta=None)
 
     ruta_verificacion_proyecto, ruta_verificacion_ev, nombre_ev= verificar_proyecto_basico(proyecto=proyecto)
 
@@ -177,8 +177,7 @@ def mostrar_proyectos():
     for proyecto in proyectos:
         print(proyecto)
 
-def crear_ev_personalizado():
-    proyecto_seleccionado, proyectos = encontrar_proyecto()
+def crear_ev_personalizado(proyecto_seleccionado, proyectos):
 
     if proyecto_seleccionado is None:
         return
@@ -193,8 +192,7 @@ def crear_ev_personalizado():
     guardar_proyecto(proyectos=proyectos)
     print("¡Proyecto actualizado y guardado con éxito!")
 
-def activar_proyecto():
-    proyecto_seleccionado, _ = encontrar_proyecto()
+def activar_proyecto(proyecto_seleccionado, proyectos):
 
     if proyecto_seleccionado is None:
         return
@@ -212,8 +210,7 @@ def activar_proyecto():
 
 
 
-def escanear_proyecto():
-    proyecto, proyectos = encontrar_proyecto()
+def escanear_proyecto(proyecto, proyectos):
 
     if proyecto is None:
         return
@@ -232,8 +229,7 @@ def escanear_proyecto():
     print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} arentorno_virtualchivos .sh")
     print("=========================================\n")
 
-def git_commit():
-    proyecto_seleccionado, _ = encontrar_proyecto()
+def git_commit(proyecto_seleccionado, proyectos):
     sistema = platform.system()
 
     if proyecto_seleccionado is None:
