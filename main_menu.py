@@ -1,6 +1,14 @@
 from logica_cli import encontrar_proyecto, agregar_proyecto, mostrar_proyectos, activar_proyecto, crear_ev_personalizado, git_commit, eliminar, escanear_proyecto,editar
 
 def main_menu():
+    opciones = {
+            1: secund_menu,
+            2: agregar_proyecto,
+            3: editar,
+            4: eliminar,
+            5: mostrar_proyectos,
+        }
+    
     while True:
         print("1) Seleccionar proyecto")
         print("2) Agregar proyecto")
@@ -18,14 +26,6 @@ def main_menu():
             print("\nTen un buen dia :)")
             break
 
-        opciones = {
-            1: secund_menu,
-            2: agregar_proyecto,
-            3: editar,
-            4: eliminar,
-            5: mostrar_proyectos,
-        }
-
         if opcion in opciones:
             opciones[opcion]()
         elif opcion == 0:
@@ -36,6 +36,13 @@ def main_menu():
 
 def secund_menu():
     proyecto_seleccionado, proyectos = encontrar_proyecto()
+
+    opciones = {
+            1: lambda: crear_ev_personalizado(proyecto_seleccionado, proyectos),
+            2: lambda: activar_proyecto(proyecto_seleccionado),
+            3: lambda: git_commit(proyecto_seleccionado),
+            4: lambda: escanear_proyecto(proyecto_seleccionado)
+        }
 
     while True:
         print(f"Proyecto seleccionado: {proyecto_seleccionado.nombre}\n")
@@ -53,15 +60,8 @@ def secund_menu():
         except KeyboardInterrupt:
             break
 
-        opciones = {
-            1: crear_ev_personalizado,
-            2: activar_proyecto,
-            3: git_commit,
-            4: escanear_proyecto
-        }
-
         if opcion in opciones:
-            opciones[opcion](proyecto_seleccionado, proyectos)
+            opciones[opcion]()
         elif opcion == 0:
             break
         else:

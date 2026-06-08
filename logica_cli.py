@@ -192,7 +192,7 @@ def crear_ev_personalizado(proyecto_seleccionado, proyectos):
     guardar_proyecto(proyectos=proyectos)
     print("¡Proyecto actualizado y guardado con éxito!")
 
-def activar_proyecto(proyecto_seleccionado, proyectos):
+def activar_proyecto(proyecto_seleccionado):
 
     if proyecto_seleccionado is None:
         return
@@ -210,7 +210,7 @@ def activar_proyecto(proyecto_seleccionado, proyectos):
 
 
 
-def escanear_proyecto(proyecto, proyectos):
+def escanear_proyecto(proyecto):
 
     if proyecto is None:
         return
@@ -229,7 +229,7 @@ def escanear_proyecto(proyecto, proyectos):
     print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} arentorno_virtualchivos .sh")
     print("=========================================\n")
 
-def git_commit(proyecto_seleccionado, proyectos):
+def git_commit(proyecto_seleccionado):
     sistema = platform.system()
 
     if proyecto_seleccionado is None:
