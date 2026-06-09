@@ -9,7 +9,6 @@ from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermed
 def encontrar_proyecto():
     proyectos = cargar_proyectos()
     proyecto_usar = None
-    
 
     for i, proyecto in enumerate(proyectos):
         print(f"| {i} {proyecto}")
@@ -21,7 +20,12 @@ def encontrar_proyecto():
         if seleccion >= 0:
 
             proyecto_usar = proyectos[seleccion]
-            print(proyecto_usar.nombre)
+            ruta = Path(proyecto_usar.ruta)
+
+            if not ruta.is_dir():
+                print("\nEl directorio no existe.\n")
+                return None, proyectos
+            
         else:
             print("El indice debe ser mayor o igual a 0")
 
@@ -70,52 +74,6 @@ def crear_ev(proyecto):
     except FileNotFoundError:
         print("Error: la ruta del proyecto no existe")
         return None
-
-def activar_windows(proyecto):
-
-    if proyecto._entorno_virtual is not None:
-        ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "Scripts", "Activate.ps1")
-        comando_interno = f'powershell -NoExit -ExecutionPolicy Bypass -File "{ruta_venv}"'
-        print(ruta_venv)
-
-    else:
-        comando_interno = f'powershell -NoExit -Command "Set-Location \'{proyecto.ruta}\'"'
-        print("Nota: No se detectó entorno virtual (.venv), abriendo terminal normal.")
-
-    try:
-        subprocess.run(f"start {comando_interno}", shell=True, check=True)
-        subprocess.run(["code", proyecto.ruta], shell="Windows", check=True)
-
-    except subprocess.CalledProcessError as e:
-        print(f"❌ El comando falló con el código: {e.returncode}")
-        print(f"🔍 El comando que falló fue: {e.cmd}")
-
-def activar_linux(proyecto):
-
-    if proyecto._entorno_virtual is not None:
-        ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "bin", "activate")
-        comando_interno = f"bash --rcfile <(echo 'source ~/.bashrc; source {ruta_venv}')"
-        print(ruta_venv)
-
-    else:
-        comando_interno = f"cd '{proyecto.ruta}' && exec bash"
-        print("Nota: No se detectó entorno virtual (.venv), abriendo terminal normal.")
-
-    try:
-        subprocess.run([
-            "x-terminal-emulator", 
-            "--", 
-            "bash", 
-            "-c", 
-            comando_interno
-        ], check=True)
-
-        subprocess.run(["code", proyecto.ruta], check=True) 
-
-    except subprocess.CalledProcessError as e:
-        print(f"❌ El comando falló con el código: {e.returncode}")
-        print(f"🔍 El comando que falló fue: {e.cmd}")
-
 
 def agregar_proyecto():
     proyecto_list = cargar_proyectos()
@@ -174,6 +132,7 @@ def eliminar():
 def mostrar_proyectos():
     proyectos = cargar_proyectos()
 
+    proyectos.sort()
     for proyecto in proyectos:
         print(proyecto)
 
@@ -192,22 +151,44 @@ def crear_ev_personalizado(proyecto_seleccionado, proyectos):
     guardar_proyecto(proyectos=proyectos)
     print("¡Proyecto actualizado y guardado con éxito!")
 
-def activar_proyecto(proyecto_seleccionado):
-
-    if proyecto_seleccionado is None:
+def crear_requirements(proyecto):
+    if proyecto is None:
+        return
+    
+    if proyecto._entorno_virtual is None:
+        print("Advertencia: No se puede crear un archivo requirements sin un entorno virtual registrado.")
         return
     
     sistema = platform.system()
+    print("Generando...")
 
-    if sistema == "Windows":
-        activar_windows(proyecto=proyecto_seleccionado)
+    try:
+        if sistema == "Linux":
+            ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "bin", "activate")
+            ruta_requirements = os.path.join(proyecto.ruta, "requirements.txt")
 
-    elif sistema == "Linux":
-        activar_linux(proyecto=proyecto_seleccionado)
+            subprocess.run([
+                "bash", 
+                "-c", 
+                f'source "{ruta_venv}" && pip freeze > "{ruta_requirements}"'
+            ], check=True)
+            
+            print("✅ Requirements creado exitosamente en Linux.")
 
-    else:
-        print(f"Sistema operativo {sistema} no soportado temporalmente")
+        else:
+            ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "Scripts", "Activate.ps1")
+            comando_powershell = f'. "{ruta_venv}"; pip freeze > "{os.path.join(proyecto.ruta, "requirements.txt")}"'
+            subprocess.run([
+                "powershell", 
+                "-NoProfile", 
+                "-ExecutionPolicy", "Bypass", 
+                "-Command", comando_powershell
+            ], check=True)
+            print("✅ Requirements generado en segundo plano con PowerShell.")
 
+    except subprocess.CalledProcessError as e:
+        print(f"❌ El comando falló con el código: {e.returncode}")
+        print(f"🔍 El comando que falló fue: {e.cmd}")
 
 
 def escanear_proyecto(proyecto):
@@ -241,8 +222,6 @@ def git_commit(proyecto_seleccionado):
         rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
         if rama == "":
             rama = "main"
-
-
 
         resultado = subprocess.run(
             ["git", "remote", "get-url", "origin"], 

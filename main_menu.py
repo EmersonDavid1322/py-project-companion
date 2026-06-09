@@ -1,4 +1,4 @@
-from logica_cli import encontrar_proyecto, agregar_proyecto, mostrar_proyectos, activar_proyecto, crear_ev_personalizado, git_commit, eliminar, escanear_proyecto,editar
+from logica_cli import encontrar_proyecto, agregar_proyecto, mostrar_proyectos, crear_ev_personalizado, git_commit, crear_requirements, eliminar, escanear_proyecto,editar
 
 def main_menu():
     opciones = {
@@ -10,7 +10,7 @@ def main_menu():
         }
     
     while True:
-        print("1) Seleccionar proyecto")
+        print("\n1) Seleccionar proyecto")
         print("2) Agregar proyecto")
         print("3) Editar proyecto")
         print("4) Eliminar proyecto")
@@ -37,19 +37,24 @@ def main_menu():
 def secund_menu():
     proyecto_seleccionado, proyectos = encontrar_proyecto()
 
+    if proyecto_seleccionado is None:
+        return
+
     opciones = {
             1: lambda: crear_ev_personalizado(proyecto_seleccionado, proyectos),
-            2: lambda: activar_proyecto(proyecto_seleccionado),
-            3: lambda: git_commit(proyecto_seleccionado),
-            4: lambda: escanear_proyecto(proyecto_seleccionado)
+            2: lambda: crear_requirements(proyecto_seleccionado),
+            3: lambda: proyecto_seleccionado.activar_proyecto(),
+            4: lambda: git_commit(proyecto_seleccionado),
+            5: lambda: escanear_proyecto(proyecto_seleccionado)
         }
 
     while True:
         print(f"Proyecto seleccionado: {proyecto_seleccionado.nombre}\n")
         print("1) Crear entorno virtual")
-        print("2) Activar proyecto")
-        print("3) Subir cambios a github")
-        print("4) Escanear proyecto")
+        print("2) Crear requirements")
+        print("3) Activar proyecto")
+        print("4) Subir cambios a github")
+        print("5) Escanear proyecto")
         print("0) Volver al menu")
 
         try:
