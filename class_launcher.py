@@ -1,7 +1,6 @@
 import platform
 import os
 import subprocess
-
 class Proyecto:
     def __init__(self, nombre, ruta, ev, git_carpeta):
         self.nombre = nombre
@@ -18,11 +17,12 @@ class Proyecto:
         }
 #METODOS ESPECIALES 
 
+    # METODOS ESPECIALES 
     def __str__(self):
-        return f"| {self.nombre} | \n| Entorno: {self._entorno_virtual} |\nRuta: {self.ruta}\nCapeta git: {self._git_carpeta}\n"
+        return f"| {self.nombre} | \n| Entorno: {self.entorno_virtual} |\nRuta: {self.ruta}\nCapeta git: {self.git_carpeta}\n"
     
     def __repr__(self):
-        return f"Proyecto(nombre='{self.nombre}', ruta='{self.ruta}', ev='{self._entorno_virtual}')"
+        return f"Proyecto(nombre='{self.nombre}', ruta='{self.ruta}', ev='{self.entorno_virtual}')"
     
     def __eq__(self, otro):
         if not isinstance(otro, Proyecto):
@@ -49,10 +49,10 @@ class Proyecto:
         if self._entorno_virtual is None:
             return "No Hay un entorno registrado"
         return self._entorno_virtual
-    
+
     @property
     def git_carpeta(self):
-        if self._git_caperta is None:
+        if self._git_carpeta is None:
             return "No Hay un repositorio registrado"
         return self._git_carpeta
 
@@ -127,3 +127,7 @@ class Proyecto:
         except subprocess.CalledProcessError as e:
             print(f"❌ El comando falló con el código: {e.returncode}")
             print(f"🔍 El comando que falló fue: {e.cmd}")
+
+# EJEMPLO DE CÓMO USARLO BIEN:
+proyecto = Proyecto("Mi App", "C:/ruta", None, None)
+print(proyecto)
