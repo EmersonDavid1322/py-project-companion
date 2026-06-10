@@ -127,7 +127,3 @@ class Proyecto:
         except subprocess.CalledProcessError as e:
             print(f"❌ El comando falló con el código: {e.returncode}")
             print(f"🔍 El comando que falló fue: {e.cmd}")
-
-# EJEMPLO DE CÓMO USARLO BIEN:
-proyecto = Proyecto("Mi App", "C:/ruta", None, None)
-print(proyecto)
