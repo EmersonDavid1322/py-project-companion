@@ -45,14 +45,9 @@ def verificador_proyecto_intermedio(proyecto):
         tiene_requirements = os.path.exists(ruta_requirements)
         
         archivos_en_directorio = os.listdir(proyecto.ruta)
-        contador_scripts_python = 0
-        contador_scripts_bash = 0
         
-        for archivo in archivos_en_directorio:
-            if archivo.endswith(".py"):
-                contador_scripts_python += 1
-            elif archivo.endswith(".sh"):
-                contador_scripts_bash += 1
+        contador_scripts_python = sum(1 for archivo in archivos_en_directorio if archivo.endswith(".py"))
+        contador_scripts_bash = sum(1 for archivo in archivos_en_directorio if archivo.endswith(".sh"))
 
         return ruta_git, tiene_requirements, contador_scripts_python, contador_scripts_bash
     except FileNotFoundError:

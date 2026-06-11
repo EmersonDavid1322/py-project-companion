@@ -29,9 +29,7 @@ def cargar_proyectos():
 
             proyectos = json.load(f)
 
-            for p_dict in proyectos:
-                proyecto_objeto = Proyecto.desde_diccionario(p_dict)
-                proyecto_lista.append(proyecto_objeto)
+            proyecto_lista = [Proyecto.desde_diccionario(proyecto) for proyecto in proyectos]
     
     except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
         print(f"Error cargando datos: {e}")

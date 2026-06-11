@@ -1,12 +1,12 @@
-from logica_cli import encontrar_proyecto, agregar_proyecto, mostrar_proyectos, crear_ev_personalizado, git_commit, crear_requirements, eliminar, escanear_proyecto,editar
+import logica_cli as cli
 
 def main_menu():
     opciones = {
             1: secund_menu,
-            2: agregar_proyecto,
-            3: editar,
-            4: eliminar,
-            5: mostrar_proyectos,
+            2: cli.agregar_proyecto,
+            3: cli.editar,
+            4: cli.eliminar,
+            5: cli.mostrar_proyectos,
         }
     
     while True:
@@ -35,17 +35,18 @@ def main_menu():
             print("Opción no disponible")
 
 def secund_menu():
-    proyecto_seleccionado, proyectos = encontrar_proyecto()
+    proyecto_seleccionado, proyectos = cli.encontrar_proyecto()
 
     if proyecto_seleccionado is None:
         return
 
     opciones = {
-            1: lambda: crear_ev_personalizado(proyecto_seleccionado, proyectos),
-            2: lambda: crear_requirements(proyecto_seleccionado),
-            3: lambda: proyecto_seleccionado.activar_proyecto(),
-            4: lambda: git_commit(proyecto_seleccionado),
-            5: lambda: escanear_proyecto(proyecto_seleccionado)
+            1: lambda: cli.crear_ev_personalizado(proyecto_seleccionado, proyectos),
+            2: lambda: cli.crear_requirements(proyecto_seleccionado),
+            3: lambda: cli.activar_proyecto(proyecto_seleccionado),
+            4: lambda: cli.git_pull(proyecto_seleccionado),
+            5: lambda: cli.git_commit(proyecto_seleccionado),
+            6: lambda: cli.escanear_proyecto(proyecto_seleccionado)
         }
 
     while True:
@@ -53,8 +54,9 @@ def secund_menu():
         print("1) Crear entorno virtual")
         print("2) Crear requirements")
         print("3) Activar proyecto")
-        print("4) Subir cambios a github")
-        print("5) Escanear proyecto")
+        print("4) Git pull")
+        print("5) Subir cambios a github")
+        print("6) Escanear proyecto")
         print("0) Volver al menu")
 
         try:

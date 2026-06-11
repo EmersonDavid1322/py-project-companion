@@ -116,7 +116,7 @@ def editar():
 
     guardar_proyecto(proyectos=proyectos)
 
-    print(f"Nombre: {proyecto_seleccionado.nombre}\nRuta: {proyecto_seleccionado.ruta}\nenv: {proyecto_seleccionado._entorno_virtual}")
+    print(f"Nombre: {proyecto_seleccionado.nombre}\nRuta: {proyecto_seleccionado.ruta}\nenv: {proyecto_seleccionado.entorno_virtual}")
 
 
 def eliminar():
@@ -190,6 +190,63 @@ def crear_requirements(proyecto):
         print(f"❌ El comando falló con el código: {e.returncode}")
         print(f"🔍 El comando que falló fue: {e.cmd}")
 
+def activar_proyecto(proyecto):
+    sistema = platform.system()
+
+    if sistema == "Windows":
+        activar_windows(proyecto)
+
+    elif sistema == "Linux":
+        activar_linux(proyecto)
+
+    else:
+        print(f"Sistema operativo {sistema} no soportado temporalmente")
+
+def activar_windows(proyecto):
+
+    if proyecto._entorno_virtual is not None:
+        ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "Scripts", "Activate.ps1")
+        comando_interno = f'powershell -NoExit -ExecutionPolicy Bypass -File "{ruta_venv}"'
+        print(ruta_venv)
+
+    else:
+        comando_interno = f'powershell -NoExit -Command "Set-Location \'{proyecto.ruta}\'"'
+        print("Nota: No se detectó entorno virtual (.venv), abriendo terminal normal.")
+
+    try:
+        subprocess.run(f"start {comando_interno}", shell=True, check=True)
+        subprocess.run(["code", proyecto.ruta], shell="Windows", check=True)
+
+    except subprocess.CalledProcessError as e:
+        print(f"❌ El comando falló con el código: {e.returncode}")
+        print(f"🔍 El comando que falló fue: {e.cmd}")
+
+def activar_linux(proyecto):
+
+    if proyecto._entorno_virtual is not None:
+        ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "bin", "activate")
+        comando_interno = f"bash --rcfile <(echo 'source ~/.bashrc; source {ruta_venv}')"
+        print(ruta_venv)
+
+    else:
+        comando_interno = f"cd '{proyecto.ruta}' && exec bash"
+        print("Nota: No se detectó entorno virtual (.venv), abriendo terminal normal.")
+
+    try:
+        subprocess.run([
+            "x-terminal-emulator", 
+            "--", 
+            "bash", 
+            "-c", 
+            comando_interno
+        ], check=True)
+
+        subprocess.run(["code", proyecto.ruta], check=True) 
+
+    except subprocess.CalledProcessError as e:
+        print(f"❌ El comando falló con el código: {e.returncode}")
+        print(f"🔍 El comando que falló fue: {e.cmd}")
+
 
 def escanear_proyecto(proyecto):
 
@@ -204,11 +261,62 @@ def escanear_proyecto(proyecto):
 
     print(f"=== REPORTE DE SALUD: {proyecto.nombre.upper()} ===")
     print(f"📍 Ruta: {proyecto.ruta}")
-    print(f"📦 Entorno Virtual: {proyecto._entorno_virtual if ruta_verificacion_ev else '❌ No configurado'}")
+    print(f"📦 Entorno Virtual: {proyecto.entorno_virtual if ruta_verificacion_ev else '❌ No configurado'}")
     print(f"🐙 Repositorio Git: {'✅ Inicializado' if tiene_git else '❌ Sin Git'}")
     print(f"📋 Archivo de Dependencias: {'✅ Detectado (requirements.txt)' if tiene_requirements else '⚠️ Falta requirements.txt'}")
     print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} arentorno_virtualchivos .sh")
     print("=========================================\n")
+
+def git_pull(proyecto_seleccionado):
+    sistema = platform.system()
+
+    if proyecto_seleccionado is None:
+        return
+
+    try:
+        print(f"Ruta: {proyecto_seleccionado.ruta}\n")
+        rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
+        if rama == "":
+            rama = "main"
+
+        resultado = subprocess.run(
+            ["git", "remote", "get-url", "origin"], 
+            capture_output=True, 
+            text=True, 
+            check=True,
+            cwd=proyecto_seleccionado.ruta
+        )
+        url_actual = resultado.stdout.strip()
+
+        if url_actual.startswith("http"):
+            print("⚠️ ADVERTENCIA: Este script ejecuta Git en segundo plano.")
+            print("Para usar esta opción, necesitas configurar claves SSH en tu cuenta")
+            print("y cambiar el origen del repositorio a SSH (git@github.com...).")
+            print("De lo contrario, el proceso se congelará esperando tu contraseña.")
+            
+            confirmar = input("\n¿Ya configuraste el 'credential.helper' para recordar tu contraseña? (s/n): ")
+            if confirmar.lower() != 's':
+                print("Operación cancelada para evitar bloqueos.")
+                return
+
+        print("Cargando cambios...")
+        
+        resultado = subprocess.run(
+            ["git", "pull", "origin", rama], 
+            capture_output=True, 
+            text=True, 
+            cwd=proyecto_seleccionado.ruta, 
+            shell=(sistema == "Windows"), 
+            check=True
+        )
+        
+        print("¡Cambios cargados con éxito!\n")
+
+    except subprocess.CalledProcessError as e:
+        print("Error al hacer pull:\n", e.stderr)
+
+    except KeyboardInterrupt:
+        print("Cancelado\n")
 
 def git_commit(proyecto_seleccionado):
     sistema = platform.system()
