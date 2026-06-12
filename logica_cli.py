@@ -368,7 +368,9 @@ def git_commit(proyecto_seleccionado):
         subprocess.run(["git", "commit", "-m", commit], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta)
         
         subprocess.run(["git", "push", "origin", rama], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta, shell=(sistema == "Windows"), check=True)
-        
+
+        guardar_accion(proyecto=proyecto_seleccionado, titulo="Git commit", 
+                        accion=f"Se hiso un git commit\nRama: {rama}\n '{commit}'")
         print("¡Cambios subidos con éxito!\n")
 
     except subprocess.CalledProcessError:
@@ -376,5 +378,3 @@ def git_commit(proyecto_seleccionado):
 
     except KeyboardInterrupt:
         print("Cancelado\n")
-
-    guardar_accion(proyecto=proyecto_seleccionado, titulo="Git commit", accion=f"Se hiso un git commit\n '{commit}'")

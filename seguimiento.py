@@ -70,7 +70,7 @@ def comprobar_info(proyecto):
                     proyecto_actualizado = proyectos[indice]
                     proyecto_actualizado._entorno_virtual = nombre_ev
 
-                    guardar_accion(proyecto=proyecto_actualizado, indice=indice,
+                    guardar_accion(proyecto=proyecto_actualizado,
                                     titulo="Entorno virtual", accion=f"Se modifico el estado del entorno virtual {proyecto_actualizado}")
                     print("Se actualizó el nombre del entorno virtual.")
             except ValueError as e:
@@ -80,7 +80,7 @@ def comprobar_info(proyecto):
             indice = proyectos.index(proyecto)
 
             proyectos[indice]._git_carpeta = ruta_git
-            guardar_accion(proyecto=proyecto, indice=indice,
+            guardar_accion(proyecto=proyecto,
                                     titulo="Carpeta git", accion=f"Se modifico el estado de la carpeta git {proyecto}")
             print("Se a actualizado la información de la carpeta git")
 
