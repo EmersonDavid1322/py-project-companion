@@ -56,6 +56,7 @@ def verificador_proyecto_intermedio(proyecto):
     
 def comprobar_info(proyecto):
     proyectos = cargar_proyectos()
+    proyecto_actualizado = proyecto
     
     ruta_verificacion_proyecto, ruta_verificacion_ev, nombre_ev = verificar_proyecto_basico(proyecto=proyecto)
     
@@ -71,7 +72,8 @@ def comprobar_info(proyecto):
                     proyecto_actualizado._entorno_virtual = nombre_ev
 
                     guardar_accion(proyecto=proyecto_actualizado,
-                                    titulo="Entorno virtual", accion=f"Se modifico el estado del entorno virtual {proyecto_actualizado}")
+                                    titulo="Entorno virtual",
+                                    accion=f"Se modifico el estado del entorno virtual Anterior: {proyecto.entorno_virtual} Nuevo: {proyecto_actualizado.entorno_virtual}")
                     print("Se actualizó el nombre del entorno virtual.")
             except ValueError as e:
                 print(f"Error: {e}")
@@ -83,7 +85,7 @@ def comprobar_info(proyecto):
             guardar_accion(proyecto=proyecto,
                                     titulo="Carpeta git", accion=f"Se modifico el estado de la carpeta git {proyecto}")
             print("Se a actualizado la información de la carpeta git")
-
+        return proyecto_actualizado
     else:
         print("Error: No se ha encontrado el directorio.")
 

@@ -46,7 +46,7 @@ def secund_menu():
             3: lambda: cli.activar_proyecto(proyecto_seleccionado),
             4: lambda: cli.git_pull(proyecto_seleccionado),
             5: lambda: cli.git_commit(proyecto_seleccionado),
-            6: lambda: cli.escanear_proyecto(proyecto_seleccionado)
+            7: lambda: cli.mostrar_historia(proyecto_seleccionado)
         }
 
     while True:
@@ -57,6 +57,7 @@ def secund_menu():
         print("4) Git pull")
         print("5) Subir cambios a github")
         print("6) Escanear proyecto")
+        print("7) Mostrar historial de acciones")
         print("0) Volver al menu")
 
         try:
@@ -67,12 +68,15 @@ def secund_menu():
         except KeyboardInterrupt:
             break
 
-        if opcion in opciones:
-            opciones[opcion]()
-        elif opcion == 0:
-            break
+        if opcion == 6:
+                proyecto_seleccionado = cli.escanear_proyecto(proyecto_seleccionado)
         else:
-            print("Opción no disponible")
+            if opcion in opciones:
+                opciones[opcion]()
+            elif opcion == 0:
+                break
+            else:
+                print("Opción no disponible")
 
 
 

@@ -68,8 +68,9 @@ class Proyecto:
     def git_carpeta(self):
         if self._git_carpeta is None:
             return "No Hay un repositorio registrado"
-        return self._git_carpeta
-
+        else:
+            return "Carpeta git detectada"
+    
     @entorno_virtual.setter
     def entorno_virtual(self, ev):
         if ev is not None and not isinstance(ev, str):

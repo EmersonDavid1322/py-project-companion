@@ -154,7 +154,8 @@ def crear_ev_personalizado(proyecto_seleccionado, proyectos):
     proyecto_seleccionado._entorno_virtual = nombre_ev
 
     guardar_accion(proyecto=proyecto_seleccionado,
-                    titulo="Entorno virtual", accion=f"Se creo y vinculó un entorno al proyecto {proyecto_seleccionado}")
+                    titulo="Entorno virtual",
+                    accion=f"Se creo y vinculó un entorno al proyecto {proyecto_seleccionado.nombre} EV: {proyecto_seleccionado.entorno_virtual}")
     print("¡Proyecto actualizado y guardado con éxito!")
 
 def crear_requirements(proyecto):
@@ -178,9 +179,6 @@ def crear_requirements(proyecto):
                 "-c", 
                 f'source "{ruta_venv}" && pip freeze > "{ruta_requirements}"'
             ], check=True)
-
-            guardar_accion(proyecto=proyecto,
-                    titulo="Entorno virtual", accion=f"Se creo y vinculó un entorno al proyecto {proyecto}")
             print("✅ Requirements creado exitosamente en Linux.")
 
         else:
@@ -193,6 +191,10 @@ def crear_requirements(proyecto):
                 "-Command", comando_powershell
             ], check=True)
             print("✅ Requirements generado en segundo plano con PowerShell.")
+
+        guardar_accion(proyecto=proyecto,
+                    titulo="requirements", 
+                    accion=f"Se creo y actualizo un archivo requirements al proyecto: {proyecto.nombre}")
 
     except subprocess.CalledProcessError as e:
         print(f"❌ El comando falló con el código: {e.returncode}")
@@ -255,26 +257,6 @@ def activar_linux(proyecto):
         print(f"❌ El comando falló con el código: {e.returncode}")
         print(f"🔍 El comando que falló fue: {e.cmd}")
 
-
-def escanear_proyecto(proyecto):
-
-    if proyecto is None:
-        return
-
-    ruta_verificacion_proyecto, ruta_verificacion_ev, _ = verificar_proyecto_basico(proyecto=proyecto)
-    
-    tiene_git, tiene_requirements, contador_scrips, contador_sh = verificador_proyecto_intermedio(proyecto=proyecto)
-
-    comprobar_info(proyecto=proyecto)
-
-    print(f"=== REPORTE DE SALUD: {proyecto.nombre.upper()} ===")
-    print(f"📍 Ruta: {proyecto.ruta}")
-    print(f"📦 Entorno Virtual: {proyecto.entorno_virtual if ruta_verificacion_ev else '❌ No configurado'}")
-    print(f"🐙 Repositorio Git: {'✅ Inicializado' if tiene_git else '❌ Sin Git'}")
-    print(f"📋 Archivo de Dependencias: {'✅ Detectado (requirements.txt)' if tiene_requirements else '⚠️ Falta requirements.txt'}")
-    print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} archivos .sh")
-    print("=========================================\n")
-
 def git_pull(proyecto_seleccionado):
     sistema = platform.system()
 
@@ -320,7 +302,8 @@ def git_pull(proyecto_seleccionado):
         
         print("¡Cambios cargados con éxito!\n")
 
-        guardar_accion(proyecto=proyecto_seleccionado, titulo="Git Pull", accion="Se hiso un git pull")
+        guardar_accion(proyecto=proyecto_seleccionado, titulo="Git Pull",
+                        accion=f"Se hiso un git pull al proyecto: {proyecto_seleccionado.nombre}")
 
     except subprocess.CalledProcessError as e:
         print("Error al hacer pull:\n", e.stderr)
@@ -370,7 +353,7 @@ def git_commit(proyecto_seleccionado):
         subprocess.run(["git", "push", "origin", rama], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta, shell=(sistema == "Windows"), check=True)
 
         guardar_accion(proyecto=proyecto_seleccionado, titulo="Git commit", 
-                        accion=f"Se hiso un git commit\nRama: {rama}\n '{commit}'")
+                        accion=f"Se hiso un git commit\nRama: {rama}\nCommit: '{commit}'")
         print("¡Cambios subidos con éxito!\n")
 
     except subprocess.CalledProcessError:
@@ -378,3 +361,27 @@ def git_commit(proyecto_seleccionado):
 
     except KeyboardInterrupt:
         print("Cancelado\n")
+
+def escanear_proyecto(proyecto):
+
+    if proyecto is None:
+        return
+
+    tiene_git, tiene_requirements, contador_scrips, contador_sh = verificador_proyecto_intermedio(proyecto=proyecto)
+
+    proyecto_actualizado = comprobar_info(proyecto=proyecto)
+
+    print(f"=== REPORTE DE SALUD: {proyecto.nombre.upper()} ===")
+    print(f"📍 Ruta: {proyecto.ruta}")
+    print(f"📦 Entorno Virtual: {proyecto.entorno_virtual}")
+    print(f"🐙 Repositorio Git: {proyecto.git_carpeta}")
+    print(f"📋 Archivo de Dependencias: {'✅ Detectado (requirements.txt)' if tiene_requirements else '⚠️ Falta requirements.txt'}")
+    print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} archivos .sh")
+    print("=========================================\n")
+
+    return proyecto_actualizado
+
+def mostrar_historia(proyecto):
+
+    for accion in proyecto.historial:
+        print(accion)

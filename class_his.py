@@ -13,6 +13,9 @@ class EventoHistorial:
             "descripcion": self.descripcion
         }
 
+    def __str__(self):
+        return f"| Fecha: {self.timestamp} |\n| Acción: {self.accion} |\n| Descricipción: {self.descripcion} |\n"
+
     @classmethod
     def desde_diccionario(cls, dicc):
         return cls(
