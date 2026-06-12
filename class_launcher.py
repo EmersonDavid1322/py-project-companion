@@ -1,11 +1,15 @@
 from class_his import EventoHistorial
+import uuid
 class Proyecto:
-    def __init__(self, nombre, ruta, ev, git_carpeta, historial=None):
+    def __init__(self, nombre, ruta, ev, git_carpeta, historial=None, id=None):
+        self.id = id if id is not None else str(uuid.uuid4())
         self.nombre = nombre
         self.ruta = ruta
         self._entorno_virtual = ev
         self._git_carpeta = git_carpeta
         self.historial = historial if historial is not None else []
+
+        
 
     def registrar_evento(self, accion, descripcion):
         nuevo_evento = EventoHistorial(accion, descripcion)
@@ -13,6 +17,7 @@ class Proyecto:
 
     def a_diccionario(self):
         return {
+            "id": str(self.id),
             "nombre": self.nombre,
             "ruta": self.ruta,
             "entorno": self._entorno_virtual,
@@ -31,7 +36,7 @@ class Proyecto:
     def __eq__(self, otro):
         if not isinstance(otro, Proyecto):
             return False
-        return self.nombre == otro.nombre 
+        return self.id == otro.id
     
     def __lt__(self, otro):
         if not isinstance(otro, Proyecto):
@@ -45,6 +50,7 @@ class Proyecto:
         objetos_historial = [EventoHistorial.desde_diccionario(e) for e in datos_historial]
         
         return cls(
+            id=diccionario.get("id", None),
             nombre=diccionario["nombre"],
             ruta=diccionario["ruta"],
             ev=diccionario.get("entorno"),

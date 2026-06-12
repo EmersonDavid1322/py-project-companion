@@ -8,7 +8,7 @@ from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermed
 
 def encontrar_proyecto():
     proyectos = cargar_proyectos()
-    proyecto_usar, indice = None, None
+    proyecto_usar = None
 
     for i, proyecto in enumerate(proyectos):
         print(f"| {i} {proyecto}")
@@ -36,7 +36,7 @@ def encontrar_proyecto():
     except KeyboardInterrupt:
         print("Cancelado\n")
 
-    return proyecto_usar, indice, proyectos
+    return proyecto_usar, proyectos
 
 def crear_ev(proyecto):
     sistema = platform.system()
@@ -96,7 +96,7 @@ def agregar_proyecto():
         print("Error: No se a encontrado la ruta")
 
 def editar():
-    proyecto_seleccionado, indice, proyectos = encontrar_proyecto()
+    proyecto_seleccionado, proyectos = encontrar_proyecto()
 
     if proyecto_seleccionado is None:
         return
@@ -117,13 +117,13 @@ def editar():
     if env != "":
         proyecto_seleccionado._entorno_virtual = env
 
-    guardar_accion(proyecto=proyecto_seleccionado, indice=indice,titulo="Edición",accion=f"Se edito el proyecto{proyecto_seleccionado}")
+    guardar_accion(proyecto=proyecto_seleccionado,titulo="Edición",accion=f"Se edito el proyecto{proyecto_seleccionado}")
 
     print(f"Nombre: {proyecto_seleccionado.nombre}\nRuta: {proyecto_seleccionado.ruta}\nenv: {proyecto_seleccionado.entorno_virtual}")
 
 
 def eliminar():
-    proyecto_seleccionado,indice, proyectos = encontrar_proyecto()
+    proyecto_seleccionado, proyectos = encontrar_proyecto()
 
     if proyecto_seleccionado is None:
         return
@@ -153,11 +153,11 @@ def crear_ev_personalizado(proyecto_seleccionado, proyectos):
 
     proyecto_seleccionado._entorno_virtual = nombre_ev
 
-    guardar_accion(proyecto=proyecto_seleccionado, indice=indice,
+    guardar_accion(proyecto=proyecto_seleccionado,
                     titulo="Entorno virtual", accion=f"Se creo y vinculó un entorno al proyecto {proyecto_seleccionado}")
     print("¡Proyecto actualizado y guardado con éxito!")
 
-def crear_requirements(proyecto, indice):
+def crear_requirements(proyecto):
     if proyecto is None:
         return
     
@@ -179,7 +179,7 @@ def crear_requirements(proyecto, indice):
                 f'source "{ruta_venv}" && pip freeze > "{ruta_requirements}"'
             ], check=True)
 
-            guardar_accion(proyecto=proyecto, indice=indice,
+            guardar_accion(proyecto=proyecto,
                     titulo="Entorno virtual", accion=f"Se creo y vinculó un entorno al proyecto {proyecto}")
             print("✅ Requirements creado exitosamente en Linux.")
 
@@ -275,7 +275,7 @@ def escanear_proyecto(proyecto):
     print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} archivos .sh")
     print("=========================================\n")
 
-def git_pull(proyecto_seleccionado, indice):
+def git_pull(proyecto_seleccionado):
     sistema = platform.system()
 
     if proyecto_seleccionado is None:
@@ -320,7 +320,7 @@ def git_pull(proyecto_seleccionado, indice):
         
         print("¡Cambios cargados con éxito!\n")
 
-        guardar_accion(proyecto=proyecto_seleccionado, indice=indice, titulo="Git Pull", accion="Se hiso un git pull")
+        guardar_accion(proyecto=proyecto_seleccionado, titulo="Git Pull", accion="Se hiso un git pull")
 
     except subprocess.CalledProcessError as e:
         print("Error al hacer pull:\n", e.stderr)
@@ -328,7 +328,7 @@ def git_pull(proyecto_seleccionado, indice):
     except KeyboardInterrupt:
         print("Cancelado\n")
 
-def git_commit(proyecto_seleccionado, indice):
+def git_commit(proyecto_seleccionado):
     sistema = platform.system()
 
     if proyecto_seleccionado is None:
@@ -377,4 +377,4 @@ def git_commit(proyecto_seleccionado, indice):
     except KeyboardInterrupt:
         print("Cancelado\n")
 
-    guardar_accion(proyecto=proyecto_seleccionado, indice=indice, titulo="Git commit", accion=f"Se hiso un git commit\n '{commit}'")
+    guardar_accion(proyecto=proyecto_seleccionado, titulo="Git commit", accion=f"Se hiso un git commit\n '{commit}'")

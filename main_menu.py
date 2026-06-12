@@ -35,17 +35,17 @@ def main_menu():
             print("Opción no disponible")
 
 def secund_menu():
-    proyecto_seleccionado, indice, proyectos = cli.encontrar_proyecto()
+    proyecto_seleccionado, proyectos = cli.encontrar_proyecto()
 
     if proyecto_seleccionado is None:
         return
 
     opciones = {
             1: lambda: cli.crear_ev_personalizado(proyecto_seleccionado, proyectos),
-            2: lambda: cli.crear_requirements(proyecto_seleccionado, indice),
+            2: lambda: cli.crear_requirements(proyecto_seleccionado),
             3: lambda: cli.activar_proyecto(proyecto_seleccionado),
-            4: lambda: cli.git_pull(proyecto_seleccionado, indice),
-            5: lambda: cli.git_commit(proyecto_seleccionado, indice),
+            4: lambda: cli.git_pull(proyecto_seleccionado),
+            5: lambda: cli.git_commit(proyecto_seleccionado),
             6: lambda: cli.escanear_proyecto(proyecto_seleccionado)
         }
 

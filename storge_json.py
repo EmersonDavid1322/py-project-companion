@@ -29,6 +29,8 @@ def cargar_proyectos():
             proyectos = json.load(f)
 
             proyecto_lista = [Proyecto.desde_diccionario(proyecto) for proyecto in proyectos]
+            if any(proyecto.get("id", None) is None for proyecto in proyectos):
+                guardar_a_json(proyecto_lista)
     
     except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
         print(f"Error cargando datos: {e}")
@@ -36,11 +38,15 @@ def cargar_proyectos():
 
     return proyecto_lista
 
-def guardar_accion(proyecto, indice, titulo, accion):
+def guardar_accion(proyecto,titulo, accion):
     proyectos = cargar_proyectos()
 
-    proyecto.registrar_evento(titulo, accion)
+    try:
+        proyecto.registrar_evento(titulo, accion)
 
-    proyectos[indice] = proyecto
+        indice = proyectos.index(proyecto)
+        proyectos[indice] = proyecto
 
-    guardar_a_json(proyectos=proyectos)
+        guardar_a_json(proyectos=proyectos)
+    except ValueError:
+        print("Error: No se encontre el proyecto")
