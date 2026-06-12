@@ -1,23 +1,27 @@
-import platform
-import os
-import subprocess
+from class_his import EventoHistorial
 class Proyecto:
-    def __init__(self, nombre, ruta, ev, git_carpeta):
+    def __init__(self, nombre, ruta, ev, git_carpeta, historial=None):
         self.nombre = nombre
         self.ruta = ruta
         self._entorno_virtual = ev
         self._git_carpeta = git_carpeta
+        self.historial = historial if historial is not None else []
+
+    def registrar_evento(self, accion, descripcion):
+        nuevo_evento = EventoHistorial(accion, descripcion)
+        self.historial.append(nuevo_evento)
 
     def a_diccionario(self):
-        return{
+        return {
             "nombre": self.nombre,
             "ruta": self.ruta,
             "entorno": self._entorno_virtual,
-            "git_carpeta": self._git_carpeta
+            "git_carpeta": self._git_carpeta,
+            "historial": [evento.a_diccionario() for evento in self.historial]
         }
-#METODOS ESPECIALES 
+    
 
-    # METODOS ESPECIALES 
+#METODOS ESPECIALES 
     def __str__(self):
         return f"| {self.nombre} | \n| Entorno: {self.entorno_virtual} |\nRuta: {self.ruta}\nCapeta git: {self.git_carpeta}\n"
     
@@ -37,11 +41,15 @@ class Proyecto:
 #DECORADORES
     @classmethod
     def desde_diccionario(cls, diccionario):
+        datos_historial = diccionario.get("historial", [])
+        objetos_historial = [EventoHistorial.desde_diccionario(e) for e in datos_historial]
+        
         return cls(
             nombre=diccionario["nombre"],
             ruta=diccionario["ruta"],
             ev=diccionario.get("entorno"),
-            git_carpeta=diccionario.get("git_carpeta", None)
+            git_carpeta=diccionario.get("git_carpeta", None),
+            historial=objetos_historial
         )
     
     @property

@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from storge_json import guardar_proyecto, cargar_proyectos
+from storge_json import cargar_proyectos, guardar_accion
 
 def verificar_proyecto_basico(proyecto):
 
@@ -67,9 +67,11 @@ def comprobar_info(proyecto):
             try:
                     indice = proyectos.index(proyecto)
                     
-                    proyectos[indice]._entorno_virtual = nombre_ev
+                    proyecto_actualizado = proyectos[indice]
+                    proyecto_actualizado._entorno_virtual = nombre_ev
 
-                    guardar_proyecto(proyectos=proyectos)
+                    guardar_accion(proyecto=proyecto_actualizado, indice=indice,
+                                    titulo="Entorno virtual", accion=f"Se modifico el estado del entorno virtual {proyecto_actualizado}")
                     print("Se actualizó el nombre del entorno virtual.")
             except ValueError as e:
                 print(f"Error: {e}")
@@ -78,7 +80,8 @@ def comprobar_info(proyecto):
             indice = proyectos.index(proyecto)
 
             proyectos[indice]._git_carpeta = ruta_git
-            guardar_proyecto(proyectos=proyectos)
+            guardar_accion(proyecto=proyecto, indice=indice,
+                                    titulo="Carpeta git", accion=f"Se modifico el estado de la carpeta git {proyecto}")
             print("Se a actualizado la información de la carpeta git")
 
     else:

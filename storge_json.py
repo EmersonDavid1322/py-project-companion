@@ -13,11 +13,10 @@ os.makedirs(CARPETA_DATA, exist_ok=True)
 
 RUTA_PROYECTOS = os.path.join(CARPETA_DATA, "proyectos.json")
 
-def guardar_proyecto(proyectos):
+def guardar_a_json(proyectos):
 
     proyectos_dict = [proyecto.a_diccionario() for proyecto in proyectos]
 
-    # 2. Sobrescribimos el archivo con la lista completa y actualizada
     with open(RUTA_PROYECTOS, "w", encoding="utf-8") as f:
         json.dump(proyectos_dict, f, indent=4, ensure_ascii=False)
 
@@ -36,3 +35,12 @@ def cargar_proyectos():
         proyecto_lista = []
 
     return proyecto_lista
+
+def guardar_accion(proyecto, indice, titulo, accion):
+    proyectos = cargar_proyectos()
+
+    proyecto.registrar_evento(titulo, accion)
+
+    proyectos[indice] = proyecto
+
+    guardar_a_json(proyectos=proyectos)

@@ -3,12 +3,12 @@ import os
 from pathlib import Path
 import platform
 from class_launcher import Proyecto
-from storge_json import guardar_proyecto, cargar_proyectos
+from storge_json import guardar_a_json, cargar_proyectos, guardar_accion
 from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermedio, comprobar_info
 
 def encontrar_proyecto():
     proyectos = cargar_proyectos()
-    proyecto_usar = None
+    proyecto_usar, indice = None, None
 
     for i, proyecto in enumerate(proyectos):
         print(f"| {i} {proyecto}")
@@ -20,6 +20,7 @@ def encontrar_proyecto():
         if seleccion >= 0:
 
             proyecto_usar = proyectos[seleccion]
+            indice = proyectos.index(proyecto_usar)
             ruta = Path(proyecto_usar.ruta)
 
             if not ruta.is_dir():
@@ -35,7 +36,7 @@ def encontrar_proyecto():
     except KeyboardInterrupt:
         print("Cancelado\n")
 
-    return proyecto_usar, proyectos
+    return proyecto_usar, indice, proyectos
 
 def crear_ev(proyecto):
     sistema = platform.system()
@@ -87,13 +88,15 @@ def agregar_proyecto():
 
     if ruta_verificacion_proyecto:
         proyecto_list.append(proyecto)
-        guardar_proyecto(proyectos=proyecto_list)
+
+        proyecto.registrar_evento(accion="Creación",descripcion=f"Se añadio el proyecto {proyecto}")
+        guardar_a_json(proyectos=proyecto_list)
         print("Recomendamos escaner el proyecto para guardar la información\n")
     else:
         print("Error: No se a encontrado la ruta")
 
 def editar():
-    proyecto_seleccionado, proyectos = encontrar_proyecto()
+    proyecto_seleccionado, indice, proyectos = encontrar_proyecto()
 
     if proyecto_seleccionado is None:
         return
@@ -114,20 +117,20 @@ def editar():
     if env != "":
         proyecto_seleccionado._entorno_virtual = env
 
-    guardar_proyecto(proyectos=proyectos)
+    guardar_accion(proyecto=proyecto_seleccionado, indice=indice,titulo="Edición",accion=f"Se edito el proyecto{proyecto_seleccionado}")
 
     print(f"Nombre: {proyecto_seleccionado.nombre}\nRuta: {proyecto_seleccionado.ruta}\nenv: {proyecto_seleccionado.entorno_virtual}")
 
 
 def eliminar():
-    proyecto_seleccionado, proyectos = encontrar_proyecto()
+    proyecto_seleccionado,indice, proyectos = encontrar_proyecto()
 
     if proyecto_seleccionado is None:
         return
 
     proyectos.remove(proyecto_seleccionado)
 
-    guardar_proyecto(proyectos=proyectos)
+    guardar_a_json(proyectos=proyectos)
 
 def mostrar_proyectos():
     proyectos = cargar_proyectos()
@@ -141,6 +144,8 @@ def crear_ev_personalizado(proyecto_seleccionado, proyectos):
     if proyecto_seleccionado is None:
         return
     
+    indice = proyectos.index(proyecto_seleccionado)
+    
     nombre_ev = crear_ev(proyecto=proyecto_seleccionado)
     if nombre_ev == None:
         print("Hubo un error en la ejecución")
@@ -148,10 +153,11 @@ def crear_ev_personalizado(proyecto_seleccionado, proyectos):
 
     proyecto_seleccionado._entorno_virtual = nombre_ev
 
-    guardar_proyecto(proyectos=proyectos)
+    guardar_accion(proyecto=proyecto_seleccionado, indice=indice,
+                    titulo="Entorno virtual", accion=f"Se creo y vinculó un entorno al proyecto {proyecto_seleccionado}")
     print("¡Proyecto actualizado y guardado con éxito!")
 
-def crear_requirements(proyecto):
+def crear_requirements(proyecto, indice):
     if proyecto is None:
         return
     
@@ -172,7 +178,9 @@ def crear_requirements(proyecto):
                 "-c", 
                 f'source "{ruta_venv}" && pip freeze > "{ruta_requirements}"'
             ], check=True)
-            
+
+            guardar_accion(proyecto=proyecto, indice=indice,
+                    titulo="Entorno virtual", accion=f"Se creo y vinculó un entorno al proyecto {proyecto}")
             print("✅ Requirements creado exitosamente en Linux.")
 
         else:
@@ -264,10 +272,10 @@ def escanear_proyecto(proyecto):
     print(f"📦 Entorno Virtual: {proyecto.entorno_virtual if ruta_verificacion_ev else '❌ No configurado'}")
     print(f"🐙 Repositorio Git: {'✅ Inicializado' if tiene_git else '❌ Sin Git'}")
     print(f"📋 Archivo de Dependencias: {'✅ Detectado (requirements.txt)' if tiene_requirements else '⚠️ Falta requirements.txt'}")
-    print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} arentorno_virtualchivos .sh")
+    print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} archivos .sh")
     print("=========================================\n")
 
-def git_pull(proyecto_seleccionado):
+def git_pull(proyecto_seleccionado, indice):
     sistema = platform.system()
 
     if proyecto_seleccionado is None:
@@ -312,13 +320,15 @@ def git_pull(proyecto_seleccionado):
         
         print("¡Cambios cargados con éxito!\n")
 
+        guardar_accion(proyecto=proyecto_seleccionado, indice=indice, titulo="Git Pull", accion="Se hiso un git pull")
+
     except subprocess.CalledProcessError as e:
         print("Error al hacer pull:\n", e.stderr)
 
     except KeyboardInterrupt:
         print("Cancelado\n")
 
-def git_commit(proyecto_seleccionado):
+def git_commit(proyecto_seleccionado, indice):
     sistema = platform.system()
 
     if proyecto_seleccionado is None:
@@ -366,3 +376,5 @@ def git_commit(proyecto_seleccionado):
 
     except KeyboardInterrupt:
         print("Cancelado\n")
+
+    guardar_accion(proyecto=proyecto_seleccionado, indice=indice, titulo="Git commit", accion=f"Se hiso un git commit\n '{commit}'")
