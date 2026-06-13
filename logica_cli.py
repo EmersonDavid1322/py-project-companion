@@ -153,7 +153,6 @@ def secuencia_commits():
             rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
             if rama == "":
                 rama = "main"
-
             
             if not any(d["proyecto"] == proyecto_seleccionado for d in lista_commits):
                 commit_informacion = {"proyecto": proyecto_seleccionado, "rama": rama, "commit": commit}
@@ -363,14 +362,22 @@ def git_commit(proyecto_seleccionado):
     if proyecto_seleccionado is None:
         return
 
-    print(f"Ruta: {proyecto_seleccionado.ruta}\n")
-    commit = input("Introduzca el commit:\n")
-    rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
-    if rama == "":
-        rama = "main"
-        
+    try:
+        print(f"Ruta: {proyecto_seleccionado.ruta}\n")
+        commit = input("Introduzca el commit:\n")
+        rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
+        if rama == "":
+            rama = "main"
 
-    ejecutar_commit(proyecto_usar=proyecto_seleccionado, rama_usar=rama, commit_usar=commit)
+        print(f"\nInformación: {proyecto_seleccionado}\nRama: {rama}\nCommit: {commit}")
+        confirmacion = input("¿Desea continuar? (SI/NO): ")
+
+        if confirmacion in ("s","si"):
+            ejecutar_commit(proyecto_usar=proyecto_seleccionado, rama_usar=rama, commit_usar=commit)
+        else:
+            print("Se cancelo el commit")
+    except KeyboardInterrupt:
+        print("Cancelado\n")
 
 def ejecutar_commit(proyecto_usar, rama_usar, commit_usar):
     sistema = platform.system()
@@ -410,9 +417,6 @@ def ejecutar_commit(proyecto_usar, rama_usar, commit_usar):
 
     except subprocess.CalledProcessError:
         print("Error: Este directorio no parece tener un repositorio de Git configurado.")
-
-    except KeyboardInterrupt:
-        print("Cancelado\n")
 
 def escanear_proyecto(proyecto):
 
