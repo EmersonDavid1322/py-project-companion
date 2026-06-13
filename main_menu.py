@@ -7,6 +7,7 @@ def main_menu():
             3: cli.editar,
             4: cli.eliminar,
             5: cli.mostrar_proyectos,
+            6: cli.secuencia_commits
         }
     
     while True:
@@ -15,6 +16,7 @@ def main_menu():
         print("3) Editar proyecto")
         print("4) Eliminar proyecto")
         print("5) Ver proyectos")
+        print("6) Secuencia de commits")
         print("0) Salir")
 
         try:

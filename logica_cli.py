@@ -2,6 +2,7 @@ import subprocess
 import os
 from pathlib import Path
 import platform
+from collections import deque
 from class_launcher import Proyecto
 from storge_json import guardar_a_json, cargar_proyectos, guardar_accion
 from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermedio, comprobar_info
@@ -138,6 +139,47 @@ def mostrar_proyectos():
     proyectos.sort()
     for proyecto in proyectos:
         print(proyecto)
+
+def secuencia_commits():
+    lista_commits = deque([])
+
+    while True:
+        try:
+            proyecto_seleccionado, _ = encontrar_proyecto()
+            if proyecto_seleccionado is None:
+                break
+            commit = input("Introduzca el commit:\n")
+
+            rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
+            if rama == "":
+                rama = "main"
+
+            
+            if not any(d["proyecto"] == proyecto_seleccionado for d in lista_commits):
+                commit_informacion = {"proyecto": proyecto_seleccionado.nombre, "rama": rama, "commit": commit}
+                lista_commits.append(commit_informacion)
+                print(f"commit añadido al proyecto: {commit_informacion}")
+            else:
+                print("Proyecto ya añadido")
+        
+        except ValueError:
+            print("Proyecto no encontrado en la lista")
+
+        except KeyboardInterrupt:
+            print("Selecciones hechas ejecutanto commits")
+            break
+    
+    if not lista_commits:
+        print("No se ejecuto ningun commit")
+        return
+    
+    while lista_commits:
+        proyecto = lista_commits.popleft()
+        print(f"Se incio el commit {proyecto}")
+        
+        ejecutar_commit(proyecto_usar=proyecto["proyecto"], rama_usar=proyecto["rama"], commit_usar=proyecto["commit"])
+
+
 
 def crear_ev_personalizado(proyecto_seleccionado, proyectos):
 
@@ -312,24 +354,28 @@ def git_pull(proyecto_seleccionado):
         print("Cancelado\n")
 
 def git_commit(proyecto_seleccionado):
-    sistema = platform.system()
-
     if proyecto_seleccionado is None:
         return
 
+    print(f"Ruta: {proyecto_seleccionado.ruta}\n")
+    commit = input("Introduzca el commit:\n")
+    rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
+    if rama == "":
+        rama = "main"
+        
+
+    ejecutar_commit(proyecto_usar=proyecto_seleccionado, rama_usar=rama, commit_usar=commit)
+
+def ejecutar_commit(proyecto_usar, rama_usar, commit_usar):
+    sistema = platform.system()
     try:
-        print(f"Ruta: {proyecto_seleccionado.ruta}\n")
-        commit = input("Introduzca el commit:\n")
-        rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
-        if rama == "":
-            rama = "main"
 
         resultado = subprocess.run(
             ["git", "remote", "get-url", "origin"], 
             capture_output=True, 
             text=True, 
             check=True,
-            cwd=proyecto_seleccionado.ruta
+            cwd=proyecto_usar.ruta
         )
         url_actual = resultado.stdout.strip()
 
@@ -346,14 +392,14 @@ def git_commit(proyecto_seleccionado):
 
         print("Subiendo cambios...")
         
-        subprocess.run(["git", "add", "."], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta)
+        subprocess.run(["git", "add", "."], stdout=subprocess.DEVNULL, cwd=proyecto_usar.ruta)
         
-        subprocess.run(["git", "commit", "-m", commit], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta)
+        subprocess.run(["git", "commit", "-m", commit_usar], stdout=subprocess.DEVNULL, cwd=proyecto_usar.ruta)
         
-        subprocess.run(["git", "push", "origin", rama], stdout=subprocess.DEVNULL, cwd=proyecto_seleccionado.ruta, shell=(sistema == "Windows"), check=True)
+        subprocess.run(["git", "push", "origin", rama_usar], stdout=subprocess.DEVNULL, cwd=proyecto_usar.ruta, shell=(sistema == "Windows"), check=True)
 
-        guardar_accion(proyecto=proyecto_seleccionado, titulo="Git commit", 
-                        accion=f"Se hiso un git commit\nRama: {rama}\nCommit: '{commit}'")
+        guardar_accion(proyecto=proyecto_usar, titulo="Git commit", 
+                        accion=f"Se hiso un git commit\nRama: {rama_usar}\nCommit: '{commit_usar}'")
         print("¡Cambios subidos con éxito!\n")
 
     except subprocess.CalledProcessError:
