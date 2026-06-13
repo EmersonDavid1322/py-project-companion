@@ -156,28 +156,34 @@ def secuencia_commits():
 
             
             if not any(d["proyecto"] == proyecto_seleccionado for d in lista_commits):
-                commit_informacion = {"proyecto": proyecto_seleccionado.nombre, "rama": rama, "commit": commit}
+                commit_informacion = {"proyecto": proyecto_seleccionado, "rama": rama, "commit": commit}
                 lista_commits.append(commit_informacion)
                 print(f"commit añadido al proyecto: {commit_informacion}")
             else:
-                print("Proyecto ya añadido")
+                print("Error: Proyecto ya añadido\n")
         
         except ValueError:
             print("Proyecto no encontrado en la lista")
 
         except KeyboardInterrupt:
-            print("Selecciones hechas ejecutanto commits")
             break
     
     if not lista_commits:
         print("No se ejecuto ningun commit")
-        return
-    
-    while lista_commits:
-        proyecto = lista_commits.popleft()
-        print(f"Se incio el commit {proyecto}")
-        
-        ejecutar_commit(proyecto_usar=proyecto["proyecto"], rama_usar=proyecto["rama"], commit_usar=proyecto["commit"])
+    else:
+        print("Proyectos seleccionados:\n")
+        for proyecto in lista_commits:
+            print(f"Información: {proyecto["proyecto"]}\nRama: {proyecto["rama"]}\nCommit: {proyecto["commit"]}\n")
+
+        confirmacion = input("¿Desea continuar? (SI/NO): ").lower()
+        if confirmacion in ("s","si"):
+            while lista_commits:
+                proyecto = lista_commits.popleft()
+                print(f"Se incio el commit {proyecto}")
+                
+                ejecutar_commit(proyecto_usar=proyecto["proyecto"], rama_usar=proyecto["rama"], commit_usar=proyecto["commit"])
+        else:
+            print("Se cancelo la ejecución")
 
 
 
