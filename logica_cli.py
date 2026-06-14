@@ -418,6 +418,25 @@ def ejecutar_commit(proyecto_usar, rama_usar, commit_usar):
     except subprocess.CalledProcessError:
         print("Error: Este directorio no parece tener un repositorio de Git configurado.")
 
+def tiempo_ultimo_commit(proyecto_seleccionado):
+    sistema = platform.system()
+
+    try:
+        resultado = subprocess.run(
+            ["git", "log", "-1", "--format=%cr"],
+            capture_output=True, 
+            text=True, 
+            cwd=proyecto_seleccionado.ruta, 
+            shell=(sistema == "Windows"), 
+            check=True
+        )
+        
+        return resultado.stdout.strip()
+
+    except subprocess.CalledProcessError as e:
+        print("Error al hacer el comando:\n", e.stderr)
+        return None
+
 def escanear_proyecto(proyecto):
 
     if proyecto is None:
@@ -433,6 +452,9 @@ def escanear_proyecto(proyecto):
     print(f"🐙 Repositorio Git: {proyecto.git_carpeta}")
     print(f"📋 Archivo de Dependencias: {'✅ Detectado (requirements.txt)' if tiene_requirements else '⚠️ Falta requirements.txt'}")
     print(f"💻 Total de Scripts: {contador_scrips} archivos .py | {contador_sh} archivos .sh")
+    if tiene_git:
+        tiempo_commit = tiempo_ultimo_commit(proyecto_actualizado)
+    print(f"Ultimo commit registrado: {tiempo_commit if tiempo_commit is not None else "No hay logs registrados"}")
     print("=========================================\n")
 
     return proyecto_actualizado
