@@ -14,26 +14,15 @@ def verificar_remoto(proyecto_usar):
         url_actual = resultado.stdout.strip()
 
         if url_actual.startswith("http"):
-            print("⚠️ ADVERTENCIA: Este script ejecuta Git en segundo plano.")
-            print("Para usar esta opción, necesitas configurar claves SSH en tu cuenta")
-            print("y cambiar el origen del repositorio a SSH (git@github.com...).")
-            print("De lo contrario, el proceso se congelará esperando tu contraseña.")
-            
-            confirmar = input("\n¿Ya configuraste el 'credential.helper' para recordar tu contraseña? (s/n): ")
-            if confirmar.lower() != 's':
-                print("Operación cancelada para evitar bloqueos.")
-                return False
-    except subprocess.CalledProcessError as e:
-        print("Error al verificar el remoto:\n", e.stderr)
-        return False
+            return {"estado": "http", "mensaje": "El repositorio es HTTP"}
 
-    return True
+    except subprocess.CalledProcessError as e:
+        return {"estado": "error_subprocess", "mensaje": f"Error al ejecutar el comando {e.stderr}" }
+
+    return {"estado": "ok", "mensaje": "El repositorio es SSH y se puede usar en segundo plano"}
 
 def ejecutar_commit(proyecto_usar, rama_usar, commit_usar):
     sistema = platform.system()
-
-    if not verificar_remoto(proyecto_usar):
-        return
 
     try:
         print("Subiendo cambios...")
@@ -53,9 +42,6 @@ def ejecutar_commit(proyecto_usar, rama_usar, commit_usar):
 
 def ejecutar_git_pull(proyecto_usar, rama_usar):
     sistema = platform.system()
-
-    if not verificar_remoto(proyecto_usar):
-        return
 
     try:
         print("Cargando cambios...")

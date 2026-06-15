@@ -2,7 +2,7 @@ from pathlib import Path
 from collections import deque
 from class_launcher import Proyecto
 from storage_json import guardar_a_json, cargar_proyectos, guardar_accion
-from git_ops import ejecutar_commit, tiempo_ultimo_commit, ejecutar_git_pull
+from git_ops import ejecutar_commit, tiempo_ultimo_commit, ejecutar_git_pull, verificar_remoto
 from sistema_ops import crear_ev
 from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermedio, comprobar_info
 
@@ -171,8 +171,36 @@ def crear_ev_personalizado(proyecto_seleccionado, proyectos):
                     accion=f"Se creo y vinculó un entorno al proyecto {proyecto_seleccionado.nombre} EV: {proyecto_seleccionado.entorno_virtual}")
     print("¡Proyecto actualizado y guardado con éxito!")
 
+
+def ui_verificacion_remoto(proyecto_seleccionado):
+    reporte = verificar_remoto(proyecto_usar=proyecto_seleccionado)
+
+    if reporte["estado"] == "http":
+        print("⚠️ ADVERTENCIA: Este script ejecuta Git en segundo plano.")
+        print("Para usar esta opción, necesitas configurar claves SSH en tu cuenta")
+        print("y cambiar el origen del repositorio a SSH (git@github.com...).")
+        print("De lo contrario, el proceso se congelará esperando tu contraseña.")
+        
+        confirmar = input("\n¿Ya configuraste el 'credential.helper' para recordar tu contraseña? (s/n): ")
+        if confirmar.lower() != 's':
+            print("Operación cancelada para evitar bloqueos.")
+            return False
+
+        return True
+    
+    elif reporte["estado"] == "error_subprocess":
+        print(reporte["mensaje"])
+        return False
+    
+    else:
+        print(reporte["mensaje"])
+        return True
+
 def git_pull(proyecto_seleccionado):
     if proyecto_seleccionado is None:
+        return
+
+    if not ui_verificacion_remoto(proyecto_seleccionado):
         return
 
     print(f"Ruta: {proyecto_seleccionado.ruta}\n")
@@ -190,6 +218,9 @@ def git_pull(proyecto_seleccionado):
 
 def git_commit(proyecto_seleccionado):
     if proyecto_seleccionado is None:
+        return
+
+    if not ui_verificacion_remoto(proyecto_seleccionado):
         return
 
     try:
