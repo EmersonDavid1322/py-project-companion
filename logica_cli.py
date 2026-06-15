@@ -1,7 +1,4 @@
-import subprocess
-import os
 from pathlib import Path
-import platform
 from collections import deque
 from class_launcher import Proyecto
 from storage_json import guardar_a_json, cargar_proyectos, guardar_accion
@@ -23,7 +20,6 @@ def encontrar_proyecto():
         if seleccion >= 0:
 
             proyecto_usar = proyectos[seleccion]
-            indice = proyectos.index(proyecto_usar)
             ruta = Path(proyecto_usar.ruta)
 
             if not ruta.is_dir():
@@ -93,9 +89,19 @@ def eliminar():
     if proyecto_seleccionado is None:
         return
 
-    proyectos.remove(proyecto_seleccionado)
+    try:
 
-    guardar_a_json(proyectos=proyectos)
+        print(f"Se eliminara el proyecto:\n{proyecto_seleccionado}")
+        confirmacion = input("¿Desea continuar? (SI/NO): ").lower()
+        if confirmacion in ("s","si"):
+            proyectos.remove(proyecto_seleccionado)
+            guardar_a_json(proyectos=proyectos)
+            print("Proyecto eliminado con éxito\n")
+        else:
+            print("Se cancelo la ejecución")
+
+    except KeyboardInterrupt:
+        print("Cancelado\n")
 
 def mostrar_proyectos():
     proyectos = cargar_proyectos()
@@ -153,8 +159,6 @@ def crear_ev_personalizado(proyecto_seleccionado, proyectos):
     if proyecto_seleccionado is None:
         return
     
-    indice = proyectos.index(proyecto_seleccionado)
-    
     nombre_ev = crear_ev(proyecto=proyecto_seleccionado)
     if nombre_ev == None:
         print("Hubo un error en la ejecución")
@@ -196,7 +200,7 @@ def git_commit(proyecto_seleccionado):
             rama = "main"
 
         print(f"\nInformación: {proyecto_seleccionado}\nRama: {rama}\nCommit: {commit}")
-        confirmacion = input("¿Desea continuar? (SI/NO): ")
+        confirmacion = input("¿Desea continuar? (SI/NO): ").lower()
 
         if confirmacion in ("s","si"):
             ejecutar_commit(proyecto_usar=proyecto_seleccionado, rama_usar=rama, commit_usar=commit)
