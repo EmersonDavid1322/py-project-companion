@@ -4,7 +4,9 @@ from pathlib import Path
 import platform
 from collections import deque
 from class_launcher import Proyecto
-from storge_json import guardar_a_json, cargar_proyectos, guardar_accion
+from storage_json import guardar_a_json, cargar_proyectos, guardar_accion
+from git_ops import ejecutar_commit, tiempo_ultimo_commit, ejecutar_git_pull
+from sistema_ops import crear_ev
 from seguimiento import verificar_proyecto_basico, verificador_proyecto_intermedio, comprobar_info
 
 def encontrar_proyecto():
@@ -38,44 +40,6 @@ def encontrar_proyecto():
         print("Cancelado\n")
 
     return proyecto_usar, proyectos
-
-def crear_ev(proyecto):
-    sistema = platform.system()
-
-    try:
-
-        _, existe_ev, _= verificar_proyecto_basico(proyecto=proyecto)
-
-        if existe_ev:
-            print("Ya se a detectado un entorno virtual en su carpeta")
-            return
-        else:
-
-            ruta = Path(proyecto.ruta)
-
-            comando_python = "py" if sistema == "Windows" else "python3"
-
-            ruta_final_env = ruta / ".venv"
-
-            comando_interno = [comando_python, "-m", "venv", str(ruta_final_env)]
-
-            resultado = subprocess.run(
-            comando_interno,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-            text=True
-            )
-            
-            if resultado.returncode == 0:
-                print("Entorno virtual creado con éxito.\n")
-                return ".venv"
-            else:
-                print(f"Error al crear el entorno: {resultado.stderr}\n")
-            return None
-    
-    except FileNotFoundError:
-        print("Error: la ruta del proyecto no existe")
-        return None
 
 def agregar_proyecto():
     proyecto_list = cargar_proyectos()
@@ -184,8 +148,6 @@ def secuencia_commits():
         else:
             print("Se cancelo la ejecución")
 
-
-
 def crear_ev_personalizado(proyecto_seleccionado, proyectos):
 
     if proyecto_seleccionado is None:
@@ -205,158 +167,22 @@ def crear_ev_personalizado(proyecto_seleccionado, proyectos):
                     accion=f"Se creo y vinculó un entorno al proyecto {proyecto_seleccionado.nombre} EV: {proyecto_seleccionado.entorno_virtual}")
     print("¡Proyecto actualizado y guardado con éxito!")
 
-def crear_requirements(proyecto):
-    if proyecto is None:
-        return
-    
-    if proyecto._entorno_virtual is None:
-        print("Advertencia: No se puede crear un archivo requirements sin un entorno virtual registrado.")
-        return
-    
-    sistema = platform.system()
-    print("Generando...")
-
-    try:
-        if sistema == "Linux":
-            ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "bin", "activate")
-            ruta_requirements = os.path.join(proyecto.ruta, "requirements.txt")
-
-            subprocess.run([
-                "bash", 
-                "-c", 
-                f'source "{ruta_venv}" && pip freeze > "{ruta_requirements}"'
-            ], check=True)
-            print("✅ Requirements creado exitosamente en Linux.")
-
-        else:
-            ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "Scripts", "Activate.ps1")
-            comando_powershell = f'. "{ruta_venv}"; pip freeze > "{os.path.join(proyecto.ruta, "requirements.txt")}"'
-            subprocess.run([
-                "powershell", 
-                "-NoProfile", 
-                "-ExecutionPolicy", "Bypass", 
-                "-Command", comando_powershell
-            ], check=True)
-            print("✅ Requirements generado en segundo plano con PowerShell.")
-
-        guardar_accion(proyecto=proyecto,
-                    titulo="requirements", 
-                    accion=f"Se creo y actualizo un archivo requirements al proyecto: {proyecto.nombre}")
-
-    except subprocess.CalledProcessError as e:
-        print(f"❌ El comando falló con el código: {e.returncode}")
-        print(f"🔍 El comando que falló fue: {e.cmd}")
-
-def activar_proyecto(proyecto):
-    sistema = platform.system()
-
-    if sistema == "Windows":
-        activar_windows(proyecto)
-
-    elif sistema == "Linux":
-        activar_linux(proyecto)
-
-    else:
-        print(f"Sistema operativo {sistema} no soportado temporalmente")
-
-def activar_windows(proyecto):
-
-    if proyecto._entorno_virtual is not None:
-        ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "Scripts", "Activate.ps1")
-        comando_interno = f'powershell -NoExit -ExecutionPolicy Bypass -File "{ruta_venv}"'
-        print(ruta_venv)
-
-    else:
-        comando_interno = f'powershell -NoExit -Command "Set-Location \'{proyecto.ruta}\'"'
-        print("Nota: No se detectó entorno virtual (.venv), abriendo terminal normal.")
-
-    try:
-        subprocess.run(f"start {comando_interno}", shell=True, check=True)
-        subprocess.run(["code", proyecto.ruta], shell="Windows", check=True)
-
-    except subprocess.CalledProcessError as e:
-        print(f"❌ El comando falló con el código: {e.returncode}")
-        print(f"🔍 El comando que falló fue: {e.cmd}")
-
-def activar_linux(proyecto):
-
-    if proyecto._entorno_virtual is not None:
-        ruta_venv = os.path.join(proyecto.ruta, proyecto._entorno_virtual, "bin", "activate")
-        comando_interno = f"bash --rcfile <(echo 'source ~/.bashrc; source {ruta_venv}')"
-        print(ruta_venv)
-
-    else:
-        comando_interno = f"cd '{proyecto.ruta}' && exec bash"
-        print("Nota: No se detectó entorno virtual (.venv), abriendo terminal normal.")
-
-    try:
-        subprocess.run([
-            "x-terminal-emulator", 
-            "--", 
-            "bash", 
-            "-c", 
-            comando_interno
-        ], check=True)
-
-        subprocess.run(["code", proyecto.ruta], check=True) 
-
-    except subprocess.CalledProcessError as e:
-        print(f"❌ El comando falló con el código: {e.returncode}")
-        print(f"🔍 El comando que falló fue: {e.cmd}")
-
 def git_pull(proyecto_seleccionado):
-    sistema = platform.system()
-
     if proyecto_seleccionado is None:
         return
 
-    try:
-        print(f"Ruta: {proyecto_seleccionado.ruta}\n")
-        rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
-        if rama == "":
-            rama = "main"
+    print(f"Ruta: {proyecto_seleccionado.ruta}\n")
+    rama = input("\n('Dejalo vacio = main')\nColoque el nombre de la rama\n")
+    if rama == "":
+        rama = "main"
 
-        resultado = subprocess.run(
-            ["git", "remote", "get-url", "origin"], 
-            capture_output=True, 
-            text=True, 
-            check=True,
-            cwd=proyecto_seleccionado.ruta
-        )
-        url_actual = resultado.stdout.strip()
+    print(f"\nInformación: {proyecto_seleccionado}\nRama: {rama}")
+    confirmacion = input("¿Desea continuar? (SI/NO): ").lower()
 
-        if url_actual.startswith("http"):
-            print("⚠️ ADVERTENCIA: Este script ejecuta Git en segundo plano.")
-            print("Para usar esta opción, necesitas configurar claves SSH en tu cuenta")
-            print("y cambiar el origen del repositorio a SSH (git@github.com...).")
-            print("De lo contrario, el proceso se congelará esperando tu contraseña.")
-            
-            confirmar = input("\n¿Ya configuraste el 'credential.helper' para recordar tu contraseña? (s/n): ")
-            if confirmar.lower() != 's':
-                print("Operación cancelada para evitar bloqueos.")
-                return
-
-        print("Cargando cambios...")
-        
-        resultado = subprocess.run(
-            ["git", "pull", "origin", rama], 
-            capture_output=True, 
-            text=True, 
-            cwd=proyecto_seleccionado.ruta, 
-            shell=(sistema == "Windows"), 
-            check=True
-        )
-        
-        print("¡Cambios cargados con éxito!\n")
-
-        guardar_accion(proyecto=proyecto_seleccionado, titulo="Git Pull",
-                        accion=f"Se hiso un git pull al proyecto: {proyecto_seleccionado.nombre}")
-
-    except subprocess.CalledProcessError as e:
-        print("Error al hacer pull:\n", e.stderr)
-
-    except KeyboardInterrupt:
-        print("Cancelado\n")
+    if confirmacion in ("s","si"):
+        ejecutar_git_pull(proyecto_usar=proyecto_seleccionado, rama_usar=rama)
+    else:
+        print("Se cancelo la ejecución")
 
 def git_commit(proyecto_seleccionado):
     if proyecto_seleccionado is None:
@@ -379,68 +205,13 @@ def git_commit(proyecto_seleccionado):
     except KeyboardInterrupt:
         print("Cancelado\n")
 
-def ejecutar_commit(proyecto_usar, rama_usar, commit_usar):
-    sistema = platform.system()
-    try:
-
-        resultado = subprocess.run(
-            ["git", "remote", "get-url", "origin"], 
-            capture_output=True, 
-            text=True, 
-            check=True,
-            cwd=proyecto_usar.ruta
-        )
-        url_actual = resultado.stdout.strip()
-
-        if url_actual.startswith("http"):
-            print("⚠️ ADVERTENCIA: Este script ejecuta Git en segundo plano.")
-            print("Para usar esta opción, necesitas configurar claves SSH en tu cuenta")
-            print("y cambiar el origen del repositorio a SSH (git@github.com...).")
-            print("De lo contrario, el proceso se congelará esperando tu contraseña.")
-            
-            confirmar = input("\n¿Ya configuraste el 'credential.helper' para recordar tu contraseña? (s/n): ")
-            if confirmar.lower() != 's':
-                print("Operación cancelada para evitar bloqueos.")
-                return
-
-        print("Subiendo cambios...")
-        
-        subprocess.run(["git", "add", "."], stdout=subprocess.DEVNULL, cwd=proyecto_usar.ruta)
-        
-        subprocess.run(["git", "commit", "-m", commit_usar], stdout=subprocess.DEVNULL, cwd=proyecto_usar.ruta)
-        
-        subprocess.run(["git", "push", "origin", rama_usar], stdout=subprocess.DEVNULL, cwd=proyecto_usar.ruta, shell=(sistema == "Windows"), check=True)
-
-        guardar_accion(proyecto=proyecto_usar, titulo="Git commit", 
-                        accion=f"Se hiso un git commit\nRama: {rama_usar}\nCommit: '{commit_usar}'")
-        print("¡Cambios subidos con éxito!\n")
-
-    except subprocess.CalledProcessError:
-        print("Error: Este directorio no parece tener un repositorio de Git configurado.")
-
-def tiempo_ultimo_commit(proyecto_seleccionado):
-    sistema = platform.system()
-
-    try:
-        resultado = subprocess.run(
-            ["git", "log", "-1", "--format=%cr"],
-            capture_output=True, 
-            text=True, 
-            cwd=proyecto_seleccionado.ruta, 
-            shell=(sistema == "Windows"), 
-            check=True
-        )
-        
-        return resultado.stdout.strip()
-
-    except subprocess.CalledProcessError as e:
-        print("Error al hacer el comando:\n", e.stderr)
-        return None
 
 def escanear_proyecto(proyecto):
 
     if proyecto is None:
         return
+
+    tiempo_commit = None
 
     tiene_git, tiene_requirements, contador_scrips, contador_sh = verificador_proyecto_intermedio(proyecto=proyecto)
 

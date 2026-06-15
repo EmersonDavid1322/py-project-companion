@@ -1,4 +1,5 @@
 import logica_cli as cli
+import sistema_ops as so
 
 def main_menu():
     opciones = {
@@ -44,8 +45,8 @@ def secund_menu():
 
     opciones = {
             1: lambda: cli.crear_ev_personalizado(proyecto_seleccionado, proyectos),
-            2: lambda: cli.crear_requirements(proyecto_seleccionado),
-            3: lambda: cli.activar_proyecto(proyecto_seleccionado),
+            2: lambda: so.crear_requirements(proyecto_seleccionado),
+            3: lambda: so.activar_proyecto(proyecto_seleccionado),
             4: lambda: cli.git_pull(proyecto_seleccionado),
             5: lambda: cli.git_commit(proyecto_seleccionado),
             7: lambda: cli.mostrar_historia(proyecto_seleccionado)

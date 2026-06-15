@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from storge_json import cargar_proyectos, guardar_accion
+from storage_json import cargar_proyectos, guardar_accion
 
 def verificar_proyecto_basico(proyecto):
 
