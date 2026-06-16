@@ -52,7 +52,7 @@ def agregar_proyecto():
 
         proyecto.registrar_evento(accion="Creación",descripcion=f"Se añadio el proyecto {proyecto}")
         guardar_a_json(proyectos=proyecto_list)
-        print("Recomendamos escaner el proyecto para guardar la información\n")
+        print("Recomendamos escaner el proyecto para actaulizar la información la información\n")
     else:
         print("Error: No se a encontrado la ruta")
 
@@ -76,9 +76,10 @@ def editar():
         proyecto_seleccionado.ruta = ubicacion
 
     if env != "":
-        proyecto_seleccionado._entorno_virtual = env
+        proyecto_seleccionado.entorno_virtual = env
 
     guardar_accion(proyecto=proyecto_seleccionado,titulo="Edición",accion=f"Se edito el proyecto{proyecto_seleccionado}")
+    guardar_a_json(proyectos=proyectos)
 
     print(f"Nombre: {proyecto_seleccionado.nombre}\nRuta: {proyecto_seleccionado.ruta}\nenv: {proyecto_seleccionado.entorno_virtual}")
 
@@ -116,6 +117,10 @@ def secuencia_commits():
     while True:
         try:
             proyecto_seleccionado, _ = encontrar_proyecto()
+
+            if not ui_verificacion_remoto(proyecto_seleccionado):
+                return
+
             if proyecto_seleccionado is None:
                 break
             commit = input("Introduzca el commit:\n")
@@ -154,7 +159,7 @@ def secuencia_commits():
         else:
             print("Se cancelo la ejecución")
 
-def crear_ev_personalizado(proyecto_seleccionado, proyectos):
+def crear_ev_personalizado(proyecto_seleccionado):
 
     if proyecto_seleccionado is None:
         return

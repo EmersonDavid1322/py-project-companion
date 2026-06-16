@@ -1,6 +1,7 @@
 import json 
 import sys
 import os
+import logging
 from class_launcher import Proyecto
 
 if getattr(sys, 'frozen', False):
@@ -22,6 +23,7 @@ def guardar_a_json(proyectos):
 
 
 def cargar_proyectos():
+    logger = logging.getLogger(__name__)
     proyecto_lista = []
     try:
         with open(RUTA_PROYECTOS, "r", encoding="utf-8") as f:
@@ -33,6 +35,7 @@ def cargar_proyectos():
                 guardar_a_json(proyecto_lista)
     
     except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+        logger.error(f"Error cargando datos: {e}")
         print(f"Error cargando datos: {e}")
         proyecto_lista = []
 

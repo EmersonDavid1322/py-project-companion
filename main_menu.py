@@ -1,7 +1,14 @@
+import logging
 import logica_cli as cli
 import sistema_ops as so
+from logs_confi import setup_logging
+
+logger = logging.getLogger(__name__)
 
 def main_menu():
+    setup_logging()
+    logger.info("El programa main_menu.py ha iniciado correctamente.")
+
     opciones = {
             1: secund_menu,
             2: cli.agregar_proyecto,
@@ -44,7 +51,7 @@ def secund_menu():
         return
 
     opciones = {
-            1: lambda: cli.crear_ev_personalizado(proyecto_seleccionado, proyectos),
+            1: lambda: cli.crear_ev_personalizado(proyecto_seleccionado),
             2: lambda: so.crear_requirements(proyecto_seleccionado),
             3: lambda: so.activar_proyecto(proyecto_seleccionado),
             4: lambda: cli.git_pull(proyecto_seleccionado),

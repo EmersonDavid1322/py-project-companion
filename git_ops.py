@@ -1,8 +1,10 @@
 import subprocess
 import platform
+import logging
 from storage_json import guardar_accion
 
 def verificar_remoto(proyecto_usar):
+    logger = logging.getLogger(__name__)
     try:
         resultado = subprocess.run(
             ["git", "remote", "get-url", "origin"], 
@@ -17,12 +19,14 @@ def verificar_remoto(proyecto_usar):
             return {"estado": "http", "mensaje": "El repositorio es HTTP"}
 
     except subprocess.CalledProcessError as e:
+        logger.error(f"Error al ejecutar el comando {e.stderr}")
         return {"estado": "error_subprocess", "mensaje": f"Error al ejecutar el comando {e.stderr}" }
 
     return {"estado": "ok", "mensaje": "El repositorio es SSH y se puede usar en segundo plano"}
 
 def ejecutar_commit(proyecto_usar, rama_usar, commit_usar):
     sistema = platform.system()
+    logger = logging.getLogger(__name__)
 
     try:
         print("Subiendo cambios...")
@@ -35,12 +39,15 @@ def ejecutar_commit(proyecto_usar, rama_usar, commit_usar):
 
         guardar_accion(proyecto=proyecto_usar, titulo="Git commit", 
                         accion=f"Se hiso un git commit\nRama: {rama_usar}\nCommit: '{commit_usar}'")
+        logger.info(f"Se hizo un commit al proyecto: {proyecto_usar.nombre} rama: {rama_usar}\nCommit: '{commit_usar}'")
         print("¡Cambios subidos con éxito!\n")
 
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error al ejecutar el comando {e.stderr}")
         print("Error: Este directorio no parece tener un repositorio de Git configurado.")
 
 def ejecutar_git_pull(proyecto_usar, rama_usar):
+    logger = logging.getLogger(__name__)
     sistema = platform.system()
 
     try:
@@ -61,6 +68,7 @@ def ejecutar_git_pull(proyecto_usar, rama_usar):
                         accion=f"Se hiso un git pull al proyecto: {proyecto_usar.nombre}")
 
     except subprocess.CalledProcessError as e:
+        logger.error(f"Error al ejecutar el comando {e.stderr}")
         print("Error al hacer pull:\n", e.stderr)
 
     except KeyboardInterrupt:
@@ -68,6 +76,7 @@ def ejecutar_git_pull(proyecto_usar, rama_usar):
 
 def tiempo_ultimo_commit(proyecto_seleccionado):
     sistema = platform.system()
+    logger = logging.getLogger(__name__)
 
     try:
         resultado = subprocess.run(
@@ -82,6 +91,7 @@ def tiempo_ultimo_commit(proyecto_seleccionado):
         return resultado.stdout.strip()
 
     except subprocess.CalledProcessError as e:
+        logger.error(f"Error al ejecutar el comando {e.stderr}")
         print("Error al hacer el comando:\n", e.stderr)
         return None
 
